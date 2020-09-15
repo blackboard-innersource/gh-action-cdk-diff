@@ -1,0 +1,28 @@
+name: CDK Diff
+description: Diff two cdk.out directories
+inputs:
+  base:
+    description: The cdk.out directory of the baseline or current synth
+    required: true
+    default: base.cdk.out
+  head:
+    description: The cdk.out directory of the new synth
+    required: true
+    default: head.cdk.out
+outputs:
+  has_diff:
+    description: Has the value of 0 if no differences found or 1 if differences found
+    value: ${{ steps.diff.outputs.diff }}
+  comment_file:
+    description: A file with markdown that contains details about the diff
+    value: ${{ steps.diff.outputs.comment_file }}
+runs:
+  using: "composite"
+  steps:
+    - name: Install yq
+      run: sudo snap install yq
+      shell: bash
+    - name: CDK diff
+      id: diff
+      run: ${{ github.action_path }}/cdk_diff.sh ${{ inputs.base }} ${{ inputs.head }}
+      shell: bash

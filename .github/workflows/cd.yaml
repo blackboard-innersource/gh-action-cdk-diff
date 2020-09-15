@@ -1,0 +1,92 @@
+name: CD Workflow
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Run action
+        id: diff
+        uses: ./
+        with:
+          base: fixtures/base.cdk.out
+          head: fixtures/head.cdk.out
+
+      - name: Test comment file exists
+        run: test -f ${{ steps.diff.outputs.comment_file }}
+
+      - name: Print comment file
+        run: cat ${{ steps.diff.outputs.comment_file }}
+
+      # Allow 6 differences due to modified times
+      - name: Test comment file contents
+        run: test $(diff ${{ steps.diff.outputs.comment_file }} fixtures/expected_base_to_head.md | grep "" -c) = "6"
+
+      - name: Test has_diff = 1
+        run: test "${{ steps.diff.outputs.has_diff }}" = "1"
+
+      - name: Copy base
+        run: cp -R fixtures/base.cdk.out fixtures/base2.cdk.out
+
+      - name: Run action with no diff
+        id: nodiff
+        uses: ./
+        with:
+          base: fixtures/base.cdk.out
+          head: fixtures/base2.cdk.out
+
+      - name: Test comment file exists
+        run: test -f ${{ steps.nodiff.outputs.comment_file }}
+
+      - name: Print comment file
+        run: cat ${{ steps.nodiff.outputs.comment_file }}
+
+      # Ensure placeholders were replaced
+      - name: Test comment file contents
+        run: diff fixtures/expected_no_diff.md ${{ steps.nodiff.outputs.comment_file }}
+
+      - name: Test has_diff = 0
+        run: test "${{ steps.nodiff.outputs.has_diff }}" = "0"
+
+  cd:
+    needs: [test]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Version
+        id: version
+        uses: blackboard-innersource/gh-action-version-cat@v1
+
+      - name: Create Release ${{ steps.version.outputs.version }}
+        if: github.event_name == 'push'
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.version.outputs.version }}
+          release_name: ${{ steps.version.outputs.version }}
+
+      - name: Checkout ${{ steps.version.outputs.version }}
+        if: github.event_name == 'push'
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ steps.version.outputs.version }}
+          fetch-depth: 0
+
+      - name: Tag and Push v${{ steps.version.outputs.major }}
+        if: github.event_name == 'push'
+        run: |
+          git tag -f v${{ steps.version.outputs.major }}
+          git push -f origin v${{ steps.version.outputs.major }}
