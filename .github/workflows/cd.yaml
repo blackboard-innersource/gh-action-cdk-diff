@@ -51,7 +51,6 @@ jobs:
       - name: Print comment file
         run: cat ${{ steps.nodiff.outputs.comment_file }}
 
-      # Ensure placeholders were replaced
       - name: Test comment file contents
         run: diff fixtures/expected_no_diff.md ${{ steps.nodiff.outputs.comment_file }}
 
