@@ -15,8 +15,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Install yq
+        run: sudo snap install yq
+
       - name: Unit tests
         run: make
+
+  action:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
 
       - name: Run action
         id: diff
@@ -28,11 +37,14 @@ jobs:
       - name: Test comment file exists
         run: test -f ${{ steps.diff.outputs.comment_file }}
 
+      - name: Print comment file
+        run: cat ${{ steps.diff.outputs.comment_file }}
+
       - name: Test has_diff = 1
         run: test "${{ steps.diff.outputs.has_diff }}" = "1"
 
   cd:
-    needs: [test]
+    needs: [test, action]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
