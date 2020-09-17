@@ -20,7 +20,7 @@ echo "🔒 Verifying checksum of yq"
 echo "fbc271365b86e4a0b7a2c5ef2aba0966aa9d25b73a06e68866638f66ae6b8408 yq" | sha256sum -c
 
 echo "📦 Installing yq to /usr/local/bin"
-install -m +x yq "/usr/local/bin/yq"
+sudo install -m +x yq "/usr/local/bin/yq"
 
 yq --version
 
