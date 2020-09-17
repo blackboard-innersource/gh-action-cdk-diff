@@ -1,23 +1,108 @@
 #!/usr/bin/env sh
 
-set -e
+# Primary function - diff two CDK cloud assembly directories
+cdk_diff() {
+  # Script args, the two directories to diff and temp directory
+  BASE_ARG=$1
+  HEAD_ARG=$2
+  TMPDIR=${3:-$(mktemp -d)}
 
-# Workplace
-TMPDIR=$(mktemp -d)
+  if [ ! -d "$BASE_ARG" ]; then
+    echo "The 'base' input is not a directory"
+    return 1
+  fi
+  if [ ! -d "$HEAD_ARG" ]; then
+    echo "The 'head' input is not a directory"
+    return 1
+  fi
 
-# Save the comment to this file
-OUTFILE="$TMPDIR/diff_comment.md"
-echo "::set-output name=comment_file::$OUTFILE"
+  BASE=$(basename "$BASE_ARG")
+  HEAD=$(basename "$HEAD_ARG")
 
-# Script args, the two directories to diff
-BASE_ARG=$1
-HEAD_ARG=$2
+  if [ "$BASE" = "$HEAD" ]; then
+    echo "The 'base' and 'head' inputs point to the same base directory names"
+    return 1
+  fi
 
-BASE=$(basename "$1")
-HEAD=$(basename "$2")
+  to_yaml "$BASE_ARG" "$TMPDIR/$BASE" || return 1
+  to_yaml "$HEAD_ARG" "$TMPDIR/$HEAD" || return 1
+
+  cd "$TMPDIR" || return 1
+
+  # Save the comment to this file
+  OUTFILE="$TMPDIR/diff_comment.md"
+  echo "::set-output name=comment_file::$OUTFILE"
+
+  if has_diff "$BASE" "$HEAD"; then
+    echo "::set-output name=diff::1"
+    OUTPUT=$(diff_output "$BASE" "$HEAD")
+    SUMMARY=$(diff_summary "$BASE" "$HEAD")
+    diff_comment "$SUMMARY" "$OUTPUT" > "$OUTFILE"
+    return 0
+  fi
+
+  echo "::set-output name=diff::0"
+  echo ":star: No CloudFormation template differences found :star:" > "$OUTFILE"
+  return 0
+}
+
+# If two files or directories are the same or not
+has_diff() {
+  if diff -u "$1" "$2" 2> /dev/null; then
+    return 1
+  fi
+  return 0
+}
+
+# Diff two things and truncate it if necessary
+diff_output() {
+  LEN=${3:-"60000"}
+  DIFF=$(diff -u "$1" "$2")
+  if [ "${#DIFF}" -gt "$LEN" ]; then
+    # shellcheck disable=SC2039
+    DIFF=${DIFF:0:$LEN}
+    TRUNCATED=$({ echo ""; echo ""; echo '!!! TRUNCATED !!!'; echo '!!! TRUNCATED !!!'; echo '!!! TRUNCATED !!!'; })
+    DIFF="$DIFF$TRUNCATED"
+  fi
+  echo "$DIFF"
+}
+
+# Diff two things in summary mode
+diff_summary() {
+  diff -q "$1" "$2"
+}
+
+# Create a comment about the diff summary and output
+diff_comment() {
+  cat <<EOF
+:ghost: This pull request introduces changes to CloudFormation templates :ghost:
+
+<details>
+<summary><b>CDK synth diff summary</b></summary>
+
+\`\`\`
+$1
+\`\`\`
+
+</details>
+
+<details>
+<summary><b>CDK synth diff details</b></summary>
+
+\`\`\`diff
+$2
+\`\`\`
+
+</details>
+EOF
+}
 
 # Used to convert JSON to YAML for shorter diffs
 to_yaml() {
+  if [ -d "$2" ]; then
+    echo "The '$2' directory already exists"
+    return 1
+  fi
   mkdir "$2"
   TEMPLATES=$(find "$1" -type f -name '*.template.json')
   for TEMPLATE in $TEMPLATES; do
@@ -26,38 +111,13 @@ to_yaml() {
     echo "Converting $TEMPLATE to $YAML_FILE"
     yq r --prettyPrint "$TEMPLATE" > "$YAML_FILE"
   done
+  return 0
 }
 
-to_yaml "$BASE_ARG" "$TMPDIR/$BASE"
-to_yaml "$HEAD_ARG" "$TMPDIR/$HEAD"
-
-cd "$TMPDIR"
-
-# See if there is a diff and pipe to file
-if diff -u "$BASE" "$HEAD" > output.diff; then
-  echo "::set-output name=diff::0"
-  echo ":star: No CloudFormation template differences found :star:" > "$OUTFILE"
-  exit 0
+# shellcheck disable=SC2039
+if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
+  if cdk_diff "$@"; then
+    exit 0
+  fi
+  exit 1
 fi
-
-# There is a diff - now generate summary and comment
-
-echo "::set-output name=diff::1"
-cat output.diff
-
-# Generate a summary of the diff
-if ! diff -q "$BASE" "$HEAD" > summary.txt; then
-  cat summary.txt
-fi
-
-# Max comment size might be 65,536 bytes, so truncate it
-cp output.diff final.diff
-truncate -s '<60000' final.diff
-
-if ! diff output.diff final.diff; then
-  { echo ""; echo ""; echo '!!! TRUNCATED !!!'; echo '!!! TRUNCATED !!!'; echo '!!! TRUNCATED !!!'; } >> final.diff
-fi
-
-# Replace placeholders in our template and output to comment file
-sed '/DIFF_SUMMARY/ r summary.txt' "$GITHUB_ACTION_PATH/diff_comment.md" | sed '/DIFF_SUMMARY/d' | \
-  sed '/DIFF_OUTPUT/ r final.diff' | sed '/DIFF_OUTPUT/d' > "$OUTFILE"

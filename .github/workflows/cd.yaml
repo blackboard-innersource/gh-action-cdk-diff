@@ -15,47 +15,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Unit tests
+        run: make
+
       - name: Run action
         id: diff
         uses: ./
         with:
-          base: fixtures/base.cdk.out
-          head: fixtures/head.cdk.out
+          base: test/fixtures/base.cdk.out
+          head: test/fixtures/head.cdk.out
 
       - name: Test comment file exists
         run: test -f ${{ steps.diff.outputs.comment_file }}
 
-      - name: Print comment file
-        run: cat ${{ steps.diff.outputs.comment_file }}
-
-      # Allow 6 differences due to modified times
-      - name: Test comment file contents
-        run: test $(diff ${{ steps.diff.outputs.comment_file }} fixtures/expected_base_to_head.md | grep "" -c) = "6"
-
       - name: Test has_diff = 1
         run: test "${{ steps.diff.outputs.has_diff }}" = "1"
-
-      - name: Copy base
-        run: cp -R fixtures/base.cdk.out fixtures/base2.cdk.out
-
-      - name: Run action with no diff
-        id: nodiff
-        uses: ./
-        with:
-          base: fixtures/base.cdk.out
-          head: fixtures/base2.cdk.out
-
-      - name: Test comment file exists
-        run: test -f ${{ steps.nodiff.outputs.comment_file }}
-
-      - name: Print comment file
-        run: cat ${{ steps.nodiff.outputs.comment_file }}
-
-      - name: Test comment file contents
-        run: diff fixtures/expected_no_diff.md ${{ steps.nodiff.outputs.comment_file }}
-
-      - name: Test has_diff = 0
-        run: test "${{ steps.nodiff.outputs.has_diff }}" = "0"
 
   cd:
     needs: [test]
