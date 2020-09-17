@@ -18,6 +18,10 @@ jobs:
       - name: Install yq
         run: sudo snap install yq
 
+      - run: which yq
+      - run: which python
+      - run: which jq
+
       - name: Unit tests
         run: make
 
