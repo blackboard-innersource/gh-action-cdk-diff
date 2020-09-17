@@ -110,6 +110,14 @@ You can also only comment on the pull request when there is a diff by using `if`
   # etc...
 ```
 
+## Developing
+
+To run tests locally:
+
+```shell script
+make
+```
+
 ## License
 
 Please see the [LICENSE](LICENSE) file.

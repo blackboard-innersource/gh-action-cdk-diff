@@ -1,0 +1,401 @@
+{
+  "Parameters": {
+    "BootstrapVersion": {
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "/cdk-bootstrap/hnb659fds/version",
+      "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store."
+    }
+  },
+  "Rules": {
+    "CheckBootstrapVersion": {
+      "Assertions": [
+        {
+          "Assert": {
+            "Fn::Not": [
+              {
+                "Fn::Contains": [
+                  [
+                    "1",
+                    "2",
+                    "3"
+                  ],
+                  {
+                    "Ref": "BootstrapVersion"
+                  }
+                ]
+              }
+            ]
+          },
+          "AssertDescription": "CDK bootstrap stack version 4 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+        }
+      ]
+    }
+  },
+  "Resources": {
+    "HandlerServiceRoleFCDC14AE": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+              ]
+            ]
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "example/Handler/ServiceRole/Resource"
+      }
+    },
+    "Handler886CB40B": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": "cdk-hnb659fds-assets-111111111111-us-east-1",
+          "S3Key": "e8fe7500a822a84c5d9c22ae4dddd1a3634c9e395f63044b28c2a88d0932a922.zip"
+        },
+        "Handler": "index.handler",
+        "Role": {
+          "Fn::GetAtt": [
+            "HandlerServiceRoleFCDC14AE",
+            "Arn"
+          ]
+        },
+        "Runtime": "python3.7",
+        "Timeout": 30
+      },
+      "DependsOn": [
+        "HandlerServiceRoleFCDC14AE"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "example/Handler/Resource",
+        "aws:asset:path": "asset.e8fe7500a822a84c5d9c22ae4dddd1a3634c9e395f63044b28c2a88d0932a922",
+        "aws:asset:property": "Code"
+      }
+    },
+    "Gateway43CB3636": {
+      "Type": "AWS::ApiGateway::RestApi",
+      "Properties": {
+        "EndpointConfiguration": {
+          "Types": [
+            "REGIONAL"
+          ]
+        },
+        "Name": "Gateway"
+      },
+      "Metadata": {
+        "aws:cdk:path": "example/Gateway/Resource"
+      }
+    },
+    "GatewayDeployment880EB8C2cf39735d744c4bb59cba600993d2bc5d": {
+      "Type": "AWS::ApiGateway::Deployment",
+      "Properties": {
+        "RestApiId": {
+          "Ref": "Gateway43CB3636"
+        },
+        "Description": "Automatically created by the RestApi construct"
+      },
+      "DependsOn": [
+        "GatewayproxyANYCE067C19",
+        "Gatewayproxy441946D2",
+        "GatewayANY8DB43F89"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "example/Gateway/Deployment/Resource"
+      }
+    },
+    "GatewayDeploymentStageprod62BC6904": {
+      "Type": "AWS::ApiGateway::Stage",
+      "Properties": {
+        "RestApiId": {
+          "Ref": "Gateway43CB3636"
+        },
+        "DeploymentId": {
+          "Ref": "GatewayDeployment880EB8C2cf39735d744c4bb59cba600993d2bc5d"
+        },
+        "StageName": "prod"
+      },
+      "Metadata": {
+        "aws:cdk:path": "example/Gateway/DeploymentStage.prod/Resource"
+      }
+    },
+    "Gatewayproxy441946D2": {
+      "Type": "AWS::ApiGateway::Resource",
+      "Properties": {
+        "ParentId": {
+          "Fn::GetAtt": [
+            "Gateway43CB3636",
+            "RootResourceId"
+          ]
+        },
+        "PathPart": "{proxy+}",
+        "RestApiId": {
+          "Ref": "Gateway43CB3636"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "example/Gateway/Default/{proxy+}/Resource"
+      }
+    },
+    "GatewayproxyANYApiPermissionexampleGateway2137960EANYproxy5543D1E0": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "Handler886CB40B",
+            "Arn"
+          ]
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:us-east-1:111111111111:",
+              {
+                "Ref": "Gateway43CB3636"
+              },
+              "/",
+              {
+                "Ref": "GatewayDeploymentStageprod62BC6904"
+              },
+              "/*/*"
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "example/Gateway/Default/{proxy+}/ANY/ApiPermission.exampleGateway2137960E.ANY..{proxy+}"
+      }
+    },
+    "GatewayproxyANYApiPermissionTestexampleGateway2137960EANYproxy105558F6": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "Handler886CB40B",
+            "Arn"
+          ]
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:us-east-1:111111111111:",
+              {
+                "Ref": "Gateway43CB3636"
+              },
+              "/test-invoke-stage/*/*"
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "example/Gateway/Default/{proxy+}/ANY/ApiPermission.Test.exampleGateway2137960E.ANY..{proxy+}"
+      }
+    },
+    "GatewayproxyANYCE067C19": {
+      "Type": "AWS::ApiGateway::Method",
+      "Properties": {
+        "HttpMethod": "ANY",
+        "ResourceId": {
+          "Ref": "Gatewayproxy441946D2"
+        },
+        "RestApiId": {
+          "Ref": "Gateway43CB3636"
+        },
+        "AuthorizationType": "NONE",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":apigateway:us-east-1:lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "Handler886CB40B",
+                    "Arn"
+                  ]
+                },
+                "/invocations"
+              ]
+            ]
+          }
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "example/Gateway/Default/{proxy+}/ANY/Resource"
+      }
+    },
+    "GatewayANYApiPermissionexampleGateway2137960EANY670CAC92": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "Handler886CB40B",
+            "Arn"
+          ]
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:us-east-1:111111111111:",
+              {
+                "Ref": "Gateway43CB3636"
+              },
+              "/",
+              {
+                "Ref": "GatewayDeploymentStageprod62BC6904"
+              },
+              "/*/"
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "example/Gateway/Default/ANY/ApiPermission.exampleGateway2137960E.ANY.."
+      }
+    },
+    "GatewayANYApiPermissionTestexampleGateway2137960EANY6D1CA677": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "Handler886CB40B",
+            "Arn"
+          ]
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:us-east-1:111111111111:",
+              {
+                "Ref": "Gateway43CB3636"
+              },
+              "/test-invoke-stage/*/"
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "example/Gateway/Default/ANY/ApiPermission.Test.exampleGateway2137960E.ANY.."
+      }
+    },
+    "GatewayANY8DB43F89": {
+      "Type": "AWS::ApiGateway::Method",
+      "Properties": {
+        "HttpMethod": "ANY",
+        "ResourceId": {
+          "Fn::GetAtt": [
+            "Gateway43CB3636",
+            "RootResourceId"
+          ]
+        },
+        "RestApiId": {
+          "Ref": "Gateway43CB3636"
+        },
+        "AuthorizationType": "NONE",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":apigateway:us-east-1:lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "Handler886CB40B",
+                    "Arn"
+                  ]
+                },
+                "/invocations"
+              ]
+            ]
+          }
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "example/Gateway/Default/ANY/Resource"
+      }
+    }
+  },
+  "Outputs": {
+    "GatewayEndpoint4DF49EE0": {
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Ref": "Gateway43CB3636"
+            },
+            ".execute-api.us-east-1.",
+            {
+              "Ref": "AWS::URLSuffix"
+            },
+            "/",
+            {
+              "Ref": "GatewayDeploymentStageprod62BC6904"
+            },
+            "/"
+          ]
+        ]
+      }
+    }
+  }
+}
