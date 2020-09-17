@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 # Primary function - diff two CDK cloud assembly directories
 cdk_diff() {
@@ -59,7 +59,6 @@ diff_output() {
   LEN=${3:-"60000"}
   DIFF=$(diff -u "$1" "$2")
   if [ "${#DIFF}" -gt "$LEN" ]; then
-    # shellcheck disable=SC2039
     DIFF=${DIFF:0:$LEN}
     TRUNCATED=$({ echo ""; echo ""; echo '!!! TRUNCATED !!!'; echo '!!! TRUNCATED !!!'; echo '!!! TRUNCATED !!!'; })
     DIFF="$DIFF$TRUNCATED"
@@ -114,10 +113,7 @@ to_yaml() {
   return 0
 }
 
-# shellcheck disable=SC2039
-echo "${BASH_SOURCE[0]}"
-echo "${0}"
-if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
   if cdk_diff "$@"; then
     exit 0
   fi
