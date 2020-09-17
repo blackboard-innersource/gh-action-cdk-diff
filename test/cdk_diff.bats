@@ -40,7 +40,6 @@ diff
 
 </details>
 EOF
-#  assert [ "$output" = "test" ]
 }
 
 @test "diff_output can diff two files" {
