@@ -20,7 +20,7 @@ runs:
   using: "composite"
   steps:
     - name: Install yq
-      run: sudo snap install yq
+      run: ${{ github.action_path }}/install_yq.sh
       shell: bash
     - name: CDK diff
       id: diff
