@@ -12,6 +12,8 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
+      - run: which go
+      - run: go version
       - name: Checkout
         uses: actions/checkout@v2
 
