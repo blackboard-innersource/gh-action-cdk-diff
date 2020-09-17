@@ -16,7 +16,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Install yq
-        run: sudo snap install yq
+        run: ./install_yq.sh
 
       - run: which yq
       - run: which python
