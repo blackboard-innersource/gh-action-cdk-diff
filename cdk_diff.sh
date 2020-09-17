@@ -108,7 +108,7 @@ to_yaml() {
     NAME=$(basename "$TEMPLATE" | sed 's/\.template\.json/\.template\.yaml/')
     YAML_FILE="$2/$NAME"
     echo "Converting $TEMPLATE to $YAML_FILE"
-    ruby -r yaml -e 'puts(YAML.load(ARGF.read).to_yaml)' < "$TEMPLATE" > "$YAML_FILE"
+    python -c 'import sys, yaml, json; yaml.safe_dump(json.load(sys.stdin), sys.stdout, default_flow_style=False, indent=2, sort_keys=False)' < "$TEMPLATE" > "$YAML_FILE"
   done
   return 0
 }
