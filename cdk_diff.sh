@@ -48,7 +48,7 @@ cdk_diff() {
 
 # If two files or directories are the same or not
 has_diff() {
-  if diff -u "$1" "$2" 2> /dev/null; then
+  if diff -u "$1" "$2" > /dev/null 2>&1; then
     return 1
   fi
   return 0
@@ -115,6 +115,8 @@ to_yaml() {
 }
 
 # shellcheck disable=SC2039
+echo "${BASH_SOURCE[0]}"
+echo "${0}"
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
   if cdk_diff "$@"; then
     exit 0

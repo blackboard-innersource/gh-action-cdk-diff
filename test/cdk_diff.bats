@@ -65,11 +65,13 @@ EOF
 @test "has_diff is successful on diff" {
   run has_diff test/fixtures/base.cdk.out/example.template.json test/fixtures/head.cdk.out/example.template.json
   assert_success
+  assert_output ""
 }
 
 @test "has_diff fails if no diff" {
   run has_diff test/fixtures/base.cdk.out/example.template.json test/fixtures/base.cdk.out/example.template.json
   assert_failure
+  assert_output ""
 }
 
 @test "to_yaml can convert JSON to YAML" {
