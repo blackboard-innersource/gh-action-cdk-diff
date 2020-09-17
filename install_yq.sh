@@ -2,7 +2,7 @@
 
 download_yq() {
   echo "⬇️ mikefarah/yq/releases/download/3.2.1/yq_linux_amd64 to yq"
-  wget -q -O yq https://github.com/mikefarah/yq/releases/download/3.3.4/yq_linux_amd64
+  wget --no-verbose -O yq https://github.com/mikefarah/yq/releases/download/3.3.4/yq_linux_amd64
 }
 
 # Very wonky to find this checksum
@@ -22,10 +22,7 @@ install_yq() {
 }
 
 main() {
-  download_yq
-  verify_yq
-  install_yq
-  yq --version
+  download_yq && verify_yq && install_yq && yq --version
 }
 
 if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
