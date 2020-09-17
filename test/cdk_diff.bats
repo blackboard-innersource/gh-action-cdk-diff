@@ -77,6 +77,12 @@ EOF
   run to_yaml test/fixtures/base.cdk.out "$TMPDIR/test"
   assert_success
   assert_output "Converting test/fixtures/base.cdk.out/example.template.json to $TMPDIR/test/example.template.yaml"
+
+  # Just spot check the converted file for YAML syntax
+  run cat "$TMPDIR/test/example.template.yaml"
+  assert_output -p "Parameters:"
+  assert_output -p "Type: AWS::Lambda::Function"
+  assert_output -p "- Action: sts:AssumeRole"
 }
 
 @test "to_yaml fails if target directory already exists" {

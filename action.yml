@@ -19,10 +19,6 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - name: Install yq
-      run: sudo snap install yq
-      shell: bash
-    - name: CDK diff
-      id: diff
+    - id: diff
       run: ${{ github.action_path }}/cdk_diff.sh ${{ inputs.base }} ${{ inputs.head }}
       shell: bash

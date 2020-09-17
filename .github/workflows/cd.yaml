@@ -15,9 +15,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Install yq
-        run: sudo snap install yq
-
       - name: Unit tests
         run: make
 
