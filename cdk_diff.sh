@@ -115,7 +115,7 @@ to_yaml() {
 }
 
 # shellcheck disable=SC2039
-if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
   if cdk_diff "$@"; then
     exit 0
   fi
