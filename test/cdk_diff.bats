@@ -19,7 +19,7 @@ function teardown {
 @test "diff_comment can generate a comment" {
   run diff_comment summary diff
   assert_success
-  assert_output <<EOF
+  assert_output - <<EOF
 :ghost: This pull request introduces changes to CloudFormation templates :ghost:
 
 <details>
