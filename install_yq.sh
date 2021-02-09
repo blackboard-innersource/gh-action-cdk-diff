@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 download_yq() {
-  echo "⬇️ mikefarah/yq/releases/download/v4.5.0/yq_linux_amd64 to yq"
-  wget --no-verbose -O yq https://github.com/mikefarah/yq/releases/download/v4.5.0/yq_linux_amd64
+  echo "⬇️ mikefarah/yq/releases/download/3.4.1/yq_linux_amd64 to yq"
+  wget --no-verbose -O yq https://github.com/mikefarah/yq/releases/download/3.4.1/yq_linux_amd64
 }
 
 # Very wonky to find this checksum
@@ -13,7 +13,7 @@ download_yq() {
 # cat checksums | awk "/yq_linux_amd64/ {print \$1\" \"\$${YQ_LINE}}"
 verify_yq() {
   echo "🔒 Verifying checksum of yq"
-  echo "b08830201aed3b75a32aebf29139877158904fe9efb05af628f43c239fb95830 yq" | sha256sum -c
+  echo "adbc6dd027607718ac74ceac15f74115ac1f3caef68babfb73246929d4ffb23c yq" | sha256sum -c
 }
 
 install_yq() {
