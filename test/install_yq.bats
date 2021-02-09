@@ -13,7 +13,7 @@ function teardown {
 @test "install can download and verify YQ" {
   run download_yq
   assert_success
-  assert_output -e ".* mikefarah/yq/releases/download/3.2.1/yq_linux_amd64 to yq"
+  assert_output -e ".* mikefarah/yq/releases/download/v4.5.0/yq_linux_amd64 to yq"
   assert [ -f yq ]
 
   run verify_yq
