@@ -108,7 +108,7 @@ to_yaml() {
     NAME=$(basename "$TEMPLATE" | sed 's/\.template\.json/\.template\.yaml/')
     YAML_FILE="$2/$NAME"
     echo "Converting $TEMPLATE to $YAML_FILE"
-    yq eval -P "$TEMPLATE" > "$YAML_FILE"
+    yq r --prettyPrint "$TEMPLATE" > "$YAML_FILE"
   done
   return 0
 }
