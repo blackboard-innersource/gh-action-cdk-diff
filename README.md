@@ -35,7 +35,7 @@ jobs:
       - name: Setup NodeJS
         uses: actions/setup-node@v1
         with:
-          node-version: "10.x"
+          node-version: "12"
 
       # Modify or remove based on your CDK language
       - name: Setup Python
@@ -44,19 +44,19 @@ jobs:
           python-version: "3.7"
 
       - name: Install CDK
-        run: npm install -g aws-cdk
+        run: npm install -g aws-cdk@1
 
-      - name: Checkout master
+      - name: Checkout main
         uses: actions/checkout@v2
         with:
-          ref: master
+          ref: main
           fetch-depth: 0
 
       # Modify based on how your project installs dependencies
-      - name: Install master dependencies
+      - name: Install main dependencies
         run: pip install pip-tools && pip-sync
 
-      - name: CDK synth master
+      - name: CDK synth main
         run: cdk synth -o base.cdk.out
 
       - name: Checkout PR branch
@@ -66,8 +66,8 @@ jobs:
           fetch-depth: 0
           clean: false
 
-      - name: Merge master to PR branch
-        run: git merge origin/master
+      - name: Merge main to PR branch
+        run: git merge origin/main
 
       # Modify based on how your project installs dependencies
       - name: Install PR branch dependencies
@@ -81,17 +81,10 @@ jobs:
         uses: blackboard-innersource/gh-action-cdk-diff@v1
 
       - name: Comment on Pull Request
-        uses: actions/github-script@v3
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            var fs = require('fs');
-            github.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: fs.readFileSync('${{ steps.diff.outputs.comment_file }}', 'utf8')
-            })
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr comment --body-file ${{ steps.diff.outputs.comment_file }}
 ```
 
 Overall, what this workflow is doing:
