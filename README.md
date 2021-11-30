@@ -89,7 +89,7 @@ jobs:
 
 Overall, what this workflow is doing:
 
-- Running `cdk synth` on the master branch.
+- Running `cdk synth` on the `main` branch.
 - Running `cdk synth` on the pull request branch.
 - Diffing the outputs of those two synths.
 - Posting a comment to the pull request with the diff.
@@ -99,7 +99,6 @@ You can also only comment on the pull request when there is a diff by using `if`
 ```yaml
 - name: Comment on Pull Request
   if: steps.diff.outputs.has_diff == 1
-  uses: actions/github-script@v3
   # etc...
 ```
 
