@@ -52,7 +52,7 @@ jobs:
 
       - name: Version
         id: version
-        uses: blackboard-innersource/gh-action-version-cat@v1
+        uses: blackboard-innersource/gh-action-version-cat@v2
 
       - name: Create Release ${{ steps.version.outputs.version }}
         if: github.event_name == 'push'
