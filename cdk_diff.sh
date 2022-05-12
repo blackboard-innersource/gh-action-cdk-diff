@@ -31,18 +31,22 @@ cdk_diff() {
 
   # Save the comment to this file
   OUTFILE="$TMPDIR/diff_comment.md"
+  DIFFFILE="$TMPDIR/synth.diff"
   echo "::set-output name=comment_file::$OUTFILE"
+  echo "::set-output name=diff_file::$DIFFFILE"
 
   if has_diff "$BASE" "$HEAD"; then
     echo "::set-output name=diff::1"
     OUTPUT=$(diff_output "$BASE" "$HEAD")
     SUMMARY=$(diff_summary "$BASE" "$HEAD")
     diff_comment "$SUMMARY" "$OUTPUT" > "$OUTFILE"
+    diff -u "$BASE" "$HEAD" > "$DIFFFILE"
     return 0
   fi
 
   echo "::set-output name=diff::0"
   echo ":star: No CloudFormation template differences found :star:" > "$OUTFILE"
+  touch "$DIFFFILE"
   return 0
 }
 

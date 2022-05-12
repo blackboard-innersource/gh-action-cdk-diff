@@ -16,6 +16,9 @@ outputs:
   comment_file:
     description: A file with markdown that contains details about the diff
     value: ${{ steps.diff.outputs.comment_file }}
+  diff_file:
+    description: A file that contains the unaltered diff output
+    value: ${{ steps.diff.outputs.diff_file }}
 runs:
   using: "composite"
   steps:
