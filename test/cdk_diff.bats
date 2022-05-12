@@ -92,12 +92,17 @@ EOF
   assert_output -p "Converting test/fixtures/base.cdk.out/example.template.json to $TMPDIR/base.cdk.out/example.template.yaml"
   assert_output -p "Converting test/fixtures/head.cdk.out/example.template.json to $TMPDIR/head.cdk.out/example.template.yaml"
   assert_output -p "::set-output name=comment_file::$TMPDIR/diff_comment.md"
+  assert_output -p "::set-output name=diff_file::$TMPDIR/synth.diff"
   assert_output -p '::set-output name=diff::1'
   assert [ -f "$TMPDIR/diff_comment.md" ]
+  assert [ -f "$TMPDIR/synth.diff" ]
 
   run cat "$TMPDIR/diff_comment.md"
   assert_output -p "This pull request introduces changes to CloudFormation templates"
   assert_output -p "Files base.cdk.out/example.template.yaml and head.cdk.out/example.template.yaml differ"
+  assert_output -p "diff -u base.cdk.out/example.template.yaml head.cdk.out/example.template.yaml"
+
+  run cat "$TMPDIR/diff_comment.md"
   assert_output -p "diff -u base.cdk.out/example.template.yaml head.cdk.out/example.template.yaml"
 }
 
@@ -107,8 +112,10 @@ EOF
   assert_output -p "Converting test/fixtures/base.cdk.out/example.template.json to $TMPDIR/base.cdk.out/example.template.yaml"
   assert_output -p "Converting test/fixtures/base.copy.cdk.out/example.template.json to $TMPDIR/base.copy.cdk.out/example.template.yaml"
   assert_output -p "::set-output name=comment_file::$TMPDIR/diff_comment.md"
+  assert_output -p "::set-output name=diff_file::$TMPDIR/synth.diff"
   assert_output -p '::set-output name=diff::0'
   assert [ -f "$TMPDIR/diff_comment.md" ]
+  assert [ -f "$TMPDIR/synth.diff" ]
 
   run cat "$TMPDIR/diff_comment.md"
   assert_output ":star: No CloudFormation template differences found :star:"
