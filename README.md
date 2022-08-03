@@ -1,4 +1,4 @@
-![CD Workflow](https://github.com/Class-Foundations/gh-action-cdk-diff/workflows/CD%20Workflow/badge.svg)
+![CD Workflow](https://github.com/blackboard-innersource/gh-action-cdk-diff/workflows/CD%20Workflow/badge.svg)
 
 # GitHub Action: CDK Diff
 
@@ -78,7 +78,7 @@ jobs:
 
       - name: Diff CDK synth outputs
         id: diff
-        uses: Class-Foundations/gh-action-cdk-diff@v1
+        uses: blackboard-innersource/gh-action-cdk-diff@v1
 
       - name: Comment on Pull Request
         env:
