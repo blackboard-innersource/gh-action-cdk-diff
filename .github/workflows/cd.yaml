@@ -62,12 +62,12 @@ jobs:
 
       - name: Create Release ${{ steps.version.outputs.version }}
         if: github.event_name == 'push'
-        uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ steps.version.outputs.version }}
-          release_name: ${{ steps.version.outputs.version }}
+        run: |
+          gh release create ${{ steps.version.outputs.version }} \
+            --title ${{ steps.version.outputs.version }} \
+            --target ${{ github.sha }}
 
       - name: Checkout ${{ steps.version.outputs.version }}
         if: github.event_name == 'push'
