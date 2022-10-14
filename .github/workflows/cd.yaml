@@ -8,6 +8,12 @@ on:
     branches:
       - master
 
+env:
+  GIT_AUTHOR_NAME: github-actions[bot]
+  GIT_AUTHOR_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+  GIT_COMMITTER_NAME: GitHub
+  GIT_COMMITTER_EMAIL: noreply@github.com
+
 jobs:
   test:
     runs-on: ubuntu-latest
