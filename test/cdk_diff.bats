@@ -5,9 +5,12 @@ load "test_helper/bats-support/load"
 load "test_helper/bats-assert/load"
 
 TMPDIR=""
+GITHUB_OUTPUT=""
 
 function setup {
   TMPDIR=$(mktemp -d)
+  GITHUB_OUTPUT="$TMPDIR/GITHUB_OUTPUT"
+  touch "$TMPDIR/GITHUB_OUTPUT"
 }
 
 function teardown {
@@ -91,9 +94,10 @@ EOF
   assert_success
   assert_output -p "Converting test/fixtures/base.cdk.out/example.template.json to $TMPDIR/base.cdk.out/example.template.yaml"
   assert_output -p "Converting test/fixtures/head.cdk.out/example.template.json to $TMPDIR/head.cdk.out/example.template.yaml"
-  assert_output -p "::set-output name=comment_file::$TMPDIR/diff_comment.md"
-  assert_output -p "::set-output name=diff_file::$TMPDIR/synth.diff"
-  assert_output -p '::set-output name=diff::1'
+  run cat $GITHUB_OUTPUT
+  assert_output -p "comment_file=$TMPDIR/diff_comment.md"
+  assert_output -p "diff_file=$TMPDIR/synth.diff"
+  assert_output -p 'diff=1'
   assert [ -f "$TMPDIR/diff_comment.md" ]
   assert [ -f "$TMPDIR/synth.diff" ]
 
@@ -111,9 +115,10 @@ EOF
   assert_success
   assert_output -p "Converting test/fixtures/base.cdk.out/example.template.json to $TMPDIR/base.cdk.out/example.template.yaml"
   assert_output -p "Converting test/fixtures/base.copy.cdk.out/example.template.json to $TMPDIR/base.copy.cdk.out/example.template.yaml"
-  assert_output -p "::set-output name=comment_file::$TMPDIR/diff_comment.md"
-  assert_output -p "::set-output name=diff_file::$TMPDIR/synth.diff"
-  assert_output -p '::set-output name=diff::0'
+  run cat $GITHUB_OUTPUT
+  assert_output -p "comment_file=$TMPDIR/diff_comment.md"
+  assert_output -p "diff_file=$TMPDIR/synth.diff"
+  assert_output -p 'diff=0'
   assert [ -f "$TMPDIR/diff_comment.md" ]
   assert [ -f "$TMPDIR/synth.diff" ]
 

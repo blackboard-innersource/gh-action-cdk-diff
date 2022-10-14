@@ -70,8 +70,9 @@ jobs:
           ref: ${{ steps.version.outputs.version }}
           fetch-depth: 0
 
+      # https://github.com/actions/toolkit/blob/master/docs/action-versioning.md
       - name: Tag and Push v${{ steps.version.outputs.major }}
         if: github.event_name == 'push'
         run: |
-          git tag -f v${{ steps.version.outputs.major }}
-          git push -f origin v${{ steps.version.outputs.major }}
+          git tag -fa v${{ steps.version.outputs.major }} -m "Update v${{ steps.version.outputs.major }} tag"
+          git push origin v${{ steps.version.outputs.major }} --force
