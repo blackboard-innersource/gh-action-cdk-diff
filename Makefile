@@ -5,7 +5,7 @@ test: test/test_helper/bats-core test/test_helper/bats-support test/test_helper/
 	$(BATS) test
 
 test/test_helper/bats-core:
-	git clone --quiet --depth 1 --branch v1.2.1 https://github.com/bats-core/bats-core.git $@
+	git clone --quiet --depth 1 --branch v1.10.0 https://github.com/bats-core/bats-core.git $@
 
 test/test_helper/%:
 	git clone --quiet --depth 1 https://github.com/bats-core/$*.git $@

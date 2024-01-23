@@ -1,6 +1,6 @@
 #!/usr/bin/env bats
 
-load "install_yq.sh"
+load "../install_yq.sh"
 load "test_helper/bats-support/load"
 load "test_helper/bats-assert/load"
 
