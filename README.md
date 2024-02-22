@@ -33,21 +33,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Setup NodeJS
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v4
         with:
-          node-version: "12"
+          node-version: "18"
 
       # Modify or remove based on your CDK language
       - name: Setup Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
-          python-version: "3.7"
+          python-version: "3.11"
 
       - name: Install CDK
-        run: npm install -g aws-cdk@1
+        run: npm install -g aws-cdk@2
 
       - name: Checkout main
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           ref: main
           fetch-depth: 0
@@ -60,7 +60,7 @@ jobs:
         run: cdk synth -o base.cdk.out
 
       - name: Checkout PR branch
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref }}
           fetch-depth: 0
@@ -80,11 +80,21 @@ jobs:
         id: diff
         uses: blackboard-innersource/gh-action-cdk-diff@v1
 
-      - name: Comment on Pull Request
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh pr comment --body-file ${{ steps.diff.outputs.comment_file }}
+      - name: Find Comment
+        uses: peter-evans/find-comment@v3
+        id: fc
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: "github-actions[bot]"
+          body-includes: CloudFormation
+
+      - name: Create or update comment
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          comment-id: ${{ steps.fc.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          body-path: ${{ steps.diff.outputs.comment_file }}
+          edit-mode: replace
 ```
 
 Overall, what this workflow is doing:
@@ -92,7 +102,7 @@ Overall, what this workflow is doing:
 - Running `cdk synth` on the `main` branch.
 - Running `cdk synth` on the pull request branch.
 - Diffing the outputs of those two synths.
-- Posting a comment to the pull request with the diff.
+- Posting new or updating existing comment in the pull request with the diff.
 
 You can also only comment on the pull request when there is a diff by using `if`:
 
