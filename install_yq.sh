@@ -19,6 +19,7 @@ verify_yq() {
 install_yq() {
   echo "📦 Installing yq to /usr/local/bin"
   sudo install -m +x yq "/usr/local/bin/yq"
+  rm -f yq
 }
 
 main() {
