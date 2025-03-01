@@ -111,7 +111,23 @@ to_yaml() {
   for TEMPLATE in $TEMPLATES; do
     NAME=$(basename "$TEMPLATE" | sed 's/\.template\.json/\.template\.yaml/')
     YAML_FILE="$2/$NAME"
+
     echo "Converting $TEMPLATE to $YAML_FILE"
+    if [[ ! -z "$IGNORE_KEYS" ]]; then
+      JSON_DATA=$(cat $TEMPLATE)
+      JSON_FILE="$(mktemp)"
+
+      for IGNORE_KEY in $(tr ',' '\n' <<< "$IGNORE_KEYS"); do
+        JSON_DATA=$(echo "$JSON_DATA" | jq --arg KEY "$IGNORE_KEY" -r 'del(.. | select(type == "object") | getpath($KEY | split(".")))')
+        if [ $? -ne 0 ]; then
+          echo "jq command failed"
+          exit 1
+        fi
+        echo $JSON_DATA > $JSON_FILE
+        TEMPLATE="$JSON_FILE"
+      done
+    fi
+
     yq r --prettyPrint "$TEMPLATE" > "$YAML_FILE"
   done
   return 0

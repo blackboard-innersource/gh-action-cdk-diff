@@ -71,7 +71,7 @@
       "Properties": {
         "Code": {
           "S3Bucket": "cdk-hnb659fds-assets-111111111111-us-east-1",
-          "S3Key": "e8fe7500a822a84c5d9c22ae4dddd1a3634c9e395f63044b28c2a88d0932a922.zip"
+          "S3Key": "e8fe7500a822a84c5d9c22ae4dddd1a3634c9e395f63044b28c2a88d0932a923.zip"
         },
         "Handler": "index.handler",
         "Role": {

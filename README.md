@@ -79,6 +79,9 @@ jobs:
       - name: Diff CDK synth outputs
         id: diff
         uses: blackboard-innersource/gh-action-cdk-diff@v1
+        with:
+          # Ignore the S3Key key in the diff. This helps reduce noise in the diff.
+          ignore-keys: S3Key
 
       - name: Find Comment
         uses: peter-evans/find-comment@v3

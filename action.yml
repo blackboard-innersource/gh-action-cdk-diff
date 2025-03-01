@@ -9,6 +9,11 @@ inputs:
     description: The cdk.out directory of the new synth
     required: true
     default: head.cdk.out
+  ignore-keys:
+    description: ->
+      A comma-separated list of JSON/YAML keys to ignore in the diff output. Nested keys are supported using dot notation (e.g.,
+      'Code.S3Key' will ignore any 'S3Key' properties that are nested under a 'Code' object).
+    required: false
 outputs:
   has_diff:
     description: Has the value of 0 if no differences found or 1 if differences found
@@ -29,3 +34,5 @@ runs:
       id: diff
       run: ${{ github.action_path }}/cdk_diff.sh ${{ inputs.base }} ${{ inputs.head }}
       shell: bash
+      env:
+        IGNORE_KEYS: "${{ inputs.ignore-keys }}"
