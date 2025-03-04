@@ -113,7 +113,7 @@ to_yaml() {
     YAML_FILE="$2/$NAME"
 
     echo "Converting $TEMPLATE to $YAML_FILE"
-    if [[ ! -z "$IGNORE_KEYS" ]]; then
+    if [[ ! -z "$CDK_DIFF_IGNORE_KEYS" ]]; then
       JSON_DATA=$(cat $TEMPLATE)
       JSON_FILE="$(mktemp)"
 
