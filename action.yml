@@ -35,4 +35,4 @@ runs:
       run: ${{ github.action_path }}/cdk_diff.sh ${{ inputs.base }} ${{ inputs.head }}
       shell: bash
       env:
-        IGNORE_KEYS: "${{ inputs.ignore-keys }}"
+        CDK_DIFF_IGNORE_KEYS: "${{ inputs.ignore-keys }}"

@@ -149,7 +149,7 @@ EOF
 }
 
 @test "cdk_diff skips keys" {
-  IGNORE_KEYS="S3Key"
+  CDK_DIFF_IGNORE_KEYS="S3Key"
   run cdk_diff test/fixtures/base.cdk.out test/fixtures/head.cdk.out "$TMPDIR"
   assert_success
   run cat $TMPDIR/base.cdk.out/example.template.yaml
@@ -157,7 +157,7 @@ EOF
 }
 
 @test "cdk_diff skips nested keys" {
-  IGNORE_KEYS="Code.S3Key"
+  CDK_DIFF_IGNORE_KEYS="Code.S3Key"
   run cdk_diff test/fixtures/base.cdk.out test/fixtures/head.cdk.out "$TMPDIR"
   assert_success
   run cat $TMPDIR/base.cdk.out/example.template.yaml

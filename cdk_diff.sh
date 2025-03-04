@@ -117,7 +117,7 @@ to_yaml() {
       JSON_DATA=$(cat $TEMPLATE)
       JSON_FILE="$(mktemp)"
 
-      for IGNORE_KEY in $(tr ',' '\n' <<< "$IGNORE_KEYS"); do
+      for IGNORE_KEY in $(tr ',' '\n' <<< "$CDK_DIFF_IGNORE_KEYS"); do
         JSON_DATA=$(echo "$JSON_DATA" | jq --arg KEY "$IGNORE_KEY" -r 'del(.. | select(type == "object") | getpath($KEY | split(".")))')
         if [ $? -ne 0 ]; then
           echo "jq command failed"
