@@ -108,6 +108,10 @@ EOF
 
   run cat "$TMPDIR/diff_comment.md"
   assert_output -p "diff -u base.cdk.out/example.template.yaml head.cdk.out/example.template.yaml"
+
+  # Confirm the output contains S3Key as we'll test ignoring it later
+  run cat $TMPDIR/base.cdk.out/example.template.yaml
+  assert_output --partial "S3Key:"
 }
 
 @test "cdk_diff can diff two cdk.out directories that are the same" {
@@ -142,4 +146,20 @@ EOF
   run cdk_diff test/fixtures/base.cdk.out test/fixtures/base.cdk.out "$TMPDIR"
   assert_failure
   assert_output "The 'base' and 'head' inputs point to the same base directory names"
+}
+
+@test "cdk_diff skips keys" {
+  CDK_DIFF_IGNORE_KEYS="S3Key"
+  run cdk_diff test/fixtures/base.cdk.out test/fixtures/head.cdk.out "$TMPDIR"
+  assert_success
+  run cat $TMPDIR/base.cdk.out/example.template.yaml
+  refute_output --partial "S3Key:"
+}
+
+@test "cdk_diff skips nested keys" {
+  CDK_DIFF_IGNORE_KEYS="Code.S3Key"
+  run cdk_diff test/fixtures/base.cdk.out test/fixtures/head.cdk.out "$TMPDIR"
+  assert_success
+  run cat $TMPDIR/base.cdk.out/example.template.yaml
+  refute_output --partial "S3Key:"
 }
