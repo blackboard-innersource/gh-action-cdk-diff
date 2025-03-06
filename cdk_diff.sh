@@ -24,9 +24,9 @@ cdk_diff() {
     return 1
   fi
 
-  to_yaml "$BASE_ARG" "$TMPDIR/$BASE" || return 1
-  to_yaml "$HEAD_ARG" "$TMPDIR/$HEAD" || return 1
-  really_to_yaml "$TMPDIR/$BASE" "$TMPDIR/$HEAD" || return 1
+  copy_templates "$BASE_ARG" "$TMPDIR/$BASE" || return 1
+  copy_templates "$HEAD_ARG" "$TMPDIR/$HEAD" || return 1
+  to_yaml "$TMPDIR/$BASE" "$TMPDIR/$HEAD" || return 1
 
   cd "$TMPDIR" || return 1
 
@@ -110,8 +110,8 @@ $2
 EOF
 }
 
-# Used to convert JSON to YAML for shorter diffs
-to_yaml() {
+# Copy template files (with any ignore key edits) to a new directory - renaming them to .yaml
+copy_templates() {
   if [ -d "$2" ]; then
     echo "The '$2' directory already exists"
     return 1
@@ -142,10 +142,13 @@ to_yaml() {
   return 0
 }
 
-really_to_yaml() {
+# Used to convert JSON to YAML for shorter diffs
+to_yaml() {
   BASEDIR="$1"
   HEADDIR="$2"
-  TEMPLATES=$(find "$1" -type f -name '*.template.yaml')
+  TEMPLATES=$(find "$BASEDIR" -type f -name '*.template.yaml')
+  PROCESSED=0
+
   for TEMPLATE in $TEMPLATES; do
     NAME=$(basename "$TEMPLATE")
 
@@ -154,11 +157,14 @@ really_to_yaml() {
       continue
     fi
 
-    if has_diff "$BASEDIR/$NAME" "$HEADDIR/$NAME"; then
+    if ! cmp --silent -- "$BASEDIR/$NAME" "$HEADDIR/$NAME"; then
       rain fmt -w "$BASEDIR/$NAME"
       rain fmt -w "$HEADDIR/$NAME"
+      ((PROCESSED++))
     fi
   done
+
+  echo "🌧️  Rain processed $PROCESSED template files"
 }
 
 if [ "${BASH_SOURCE[0]}" = "${0}" ]; then

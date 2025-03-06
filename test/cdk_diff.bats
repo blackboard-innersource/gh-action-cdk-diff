@@ -76,15 +76,9 @@ EOF
   assert_output ""
 }
 
-@test "to_yaml can convert JSON to YAML" {
-  run to_yaml test/fixtures/base.cdk.out "$TMPDIR/test"
-  assert_success
-  assert_output "Converting test/fixtures/base.cdk.out/example.template.json to $TMPDIR/test/example.template.yaml"
-}
-
-@test "to_yaml fails if target directory already exists" {
+@test "copy_templates fails if target directory already exists" {
   mkdir "$TMPDIR/test"
-  run to_yaml test/fixtures/base.cdk.out "$TMPDIR/test"
+  run copy_templates test/fixtures/base.cdk.out "$TMPDIR/test"
   assert_failure
   assert_output "The '$TMPDIR/test' directory already exists"
 }
@@ -92,8 +86,7 @@ EOF
 @test "cdk_diff can diff two cdk.out directories" {
   run cdk_diff test/fixtures/base.cdk.out test/fixtures/head.cdk.out "$TMPDIR"
   assert_success
-  assert_output -p "Converting test/fixtures/base.cdk.out/example.template.json to $TMPDIR/base.cdk.out/example.template.yaml"
-  assert_output -p "Converting test/fixtures/head.cdk.out/example.template.json to $TMPDIR/head.cdk.out/example.template.yaml"
+  assert_output -e ".*processed 1 template files.*"
   run cat $GITHUB_OUTPUT
   assert_output -p "comment_file=$TMPDIR/diff_comment.md"
   assert_output -p "diff_file=$TMPDIR/synth.diff"
@@ -117,8 +110,8 @@ EOF
 @test "cdk_diff can diff two cdk.out directories that are the same" {
   run cdk_diff test/fixtures/base.cdk.out test/fixtures/base.copy.cdk.out "$TMPDIR"
   assert_success
-  assert_output -p "Converting test/fixtures/base.cdk.out/example.template.json to $TMPDIR/base.cdk.out/example.template.yaml"
-  assert_output -p "Converting test/fixtures/base.copy.cdk.out/example.template.json to $TMPDIR/base.copy.cdk.out/example.template.yaml"
+  # This is zero because we only convert JSON to YAML if they are different
+  assert_output -e ".*processed 0 template files.*"
   run cat $GITHUB_OUTPUT
   assert_output -p "comment_file=$TMPDIR/diff_comment.md"
   assert_output -p "diff_file=$TMPDIR/synth.diff"
