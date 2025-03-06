@@ -21,8 +21,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install yq
-        run: ./install_yq.sh
+      - name: Install rain
+        run: ./install_rain.sh
 
       - name: Unit tests
         run: make

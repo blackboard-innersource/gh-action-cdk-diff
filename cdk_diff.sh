@@ -37,8 +37,15 @@ cdk_diff() {
 
   if has_diff "$BASE" "$HEAD"; then
     echo "diff=1" >> $GITHUB_OUTPUT
-    OUTPUT=$(diff_output "$BASE" "$HEAD")
     SUMMARY=$(diff_summary "$BASE" "$HEAD")
+
+    # Determine how much room we have for the DIFF output
+    SUMMARY_SIZE=$(diff_comment "$SUMMARY" "empty" | wc -c)
+    MAX_TOTAL=65500 # Internet claims GH max comment size is 65,536.
+    REMAINING_LEN=$((MAX_TOTAL - SUMMARY_SIZE))
+
+    OUTPUT=$(diff_output "$BASE" "$HEAD" "$REMAINING_LEN")
+
     diff_comment "$SUMMARY" "$OUTPUT" > "$OUTFILE"
     diff -u "$BASE" "$HEAD" > "$DIFFFILE"
     return 0
@@ -128,7 +135,7 @@ to_yaml() {
       done
     fi
 
-    yq r --prettyPrint "$TEMPLATE" > "$YAML_FILE"
+    rain fmt "$TEMPLATE" > "$YAML_FILE"
   done
   return 0
 }
