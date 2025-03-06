@@ -41,8 +41,10 @@ cdk_diff() {
 
     # Determine how much room we have for the DIFF output
     SUMMARY_SIZE=$(diff_comment "$SUMMARY" "empty" | wc -c)
-    MAX_TOTAL=65500 # Internet claims GH max comment size is 65,536.
+    MAX_TOTAL=65500 # GH max comment size is 65536.
     REMAINING_LEN=$((MAX_TOTAL - SUMMARY_SIZE))
+    # Comment will probably be too large, but lets not use negative numbers
+    REMAINING_LEN=$((REMAINING_LEN < 10 ? 10 : REMAINING_LEN))
 
     OUTPUT=$(diff_output "$BASE" "$HEAD" "$REMAINING_LEN")
 
