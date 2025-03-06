@@ -178,6 +178,8 @@ diff_with_cdk() {
 
   OUTFILE="$TMPDIR/diff_comment.md"
   DIFFFILE="$TMPDIR/synth.diff"
+  echo "comment_file=$OUTFILE" >> $GITHUB_OUTPUT
+  echo "diff_file=$DIFFFILE" >> $GITHUB_OUTPUT
 
   COMMENT=":ghost: This pull request introduces changes to CloudFormation templates :ghost:\n\n"
   HAS_DIFF=0
@@ -211,10 +213,9 @@ diff_with_cdk() {
     echo "diff=1" >> $GITHUB_OUTPUT
   else
     echo "diff=0" >> $GITHUB_OUTPUT
+    echo ":star: No CloudFormation template differences found :star:" > "$OUTFILE"
+    touch "$DIFFFILE"
   fi
-
-  echo "comment_file=$OUTFILE" >> $GITHUB_OUTPUT
-  echo "diff_file=$DIFFFILE" >> $GITHUB_OUTPUT
 }
 
 if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
