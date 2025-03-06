@@ -24,6 +24,10 @@ cdk_diff() {
     return 1
   fi
 
+  if [ -n "$CDK_DIFF_WITH_CDK" ]; then
+    diff_with_cdk "$BASE_ARG" "$HEAD_ARG" || return 1
+  fi
+
   copy_templates "$BASE_ARG" "$TMPDIR/$BASE" || return 1
   copy_templates "$HEAD_ARG" "$TMPDIR/$HEAD" || return 1
   to_yaml "$TMPDIR/$BASE" "$TMPDIR/$HEAD" || return 1
@@ -165,6 +169,29 @@ to_yaml() {
   done
 
   echo "🌧️  Rain processed $PROCESSED template files"
+}
+
+diff_with_cdk() {
+  BASEDIR="$1"
+  HEADDIR="$2"
+
+  # TODO: perform 2 loops where we check if a file is unique in base/head
+
+  TEMPLATES=$(find "$BASEDIR" -type f -name '*.template.json')
+    for TEMPLATE in $TEMPLATES; do
+    NAME=$(basename "$TEMPLATE")
+    STACKID=$(basename "$TEMPLATE" ".template.json")
+
+    # Skip if either file does not exist
+    if [ ! -f "$BASEDIR/$NAME" ] || [ ! -f "$HEADDIR/$NAME" ]; then
+      continue
+    fi
+    if cmp --silent -- "$BASEDIR/$NAME" "$HEADDIR/$NAME"; then
+      # TODO say they are the same
+      continue
+    fi
+    cdk diff -a "$BASEDIR" --template "$HEADDIR/$NAME" "$STACKID"
+  done
 }
 
 if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
