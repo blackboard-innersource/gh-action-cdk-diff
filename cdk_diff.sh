@@ -202,7 +202,7 @@ diff_with_cdk() {
     fi
     HAS_DIFF=1
 
-    CDK_OUTPUT=$(cdk diff -a "$BASEDIR" --template "$HEADDIR/$NAME" "$STACKID")
+    CDK_OUTPUT=$(cdk diff -a "$BASEDIR" --template "$HEADDIR/$NAME" --exclusively "$STACKID")
     NEWCOMMENT="$COMMENT<details>\n<summary><b>CDK diff for $STACKID</b></summary>\n\n\`\`\`\n$CDK_OUTPUT\n\`\`\`\n</details>\n\n"
 
     if [ "${#NEWCOMMENT}" -gt "$MAX_TOTAL" ]; then
