@@ -26,6 +26,7 @@ cdk_diff() {
 
   if [ -n "$CDK_DIFF_WITH_CDK" ]; then
     diff_with_cdk "$BASE_ARG" "$HEAD_ARG" || return 1
+    return 0
   fi
 
   copy_templates "$BASE_ARG" "$TMPDIR/$BASE" || return 1
@@ -175,10 +176,14 @@ diff_with_cdk() {
   BASEDIR="$1"
   HEADDIR="$2"
 
-  # TODO: perform 2 loops where we check if a file is unique in base/head
+  OUTFILE="$TMPDIR/diff_comment.md"
+  DIFFFILE="$TMPDIR/synth.diff"
+
+  COMMENT=":ghost: This pull request introduces changes to CloudFormation templates :ghost:\n\n"
+  HAS_DIFF=0
 
   TEMPLATES=$(find "$BASEDIR" -type f -name '*.template.json')
-    for TEMPLATE in $TEMPLATES; do
+  for TEMPLATE in $TEMPLATES; do
     NAME=$(basename "$TEMPLATE")
     STACKID=$(basename "$TEMPLATE" ".template.json")
 
@@ -187,11 +192,29 @@ diff_with_cdk() {
       continue
     fi
     if cmp --silent -- "$BASEDIR/$NAME" "$HEADDIR/$NAME"; then
-      # TODO say they are the same
+      COMMENT+="✅ No changes in stack: $STACKID\n\n"
       continue
     fi
-    cdk diff -a "$BASEDIR" --template "$HEADDIR/$NAME" "$STACKID"
+
+    HAS_DIFF=1
+    COMMENT+="⚠️ Changes detected in stack: $STACKID\n\n"
+    COMMENT+="<details>\n<summary><b>CDK diff for $STACKID</b></summary>\n\n\`\`\`\n"
+
+    # Capture CDK diff output
+    CDK_OUTPUT=$(cdk diff -a "$BASEDIR" --template "$HEADDIR/$NAME" "$STACKID" 2>&1)
+    COMMENT+="$CDK_OUTPUT\n\`\`\`\n</details>\n\n"
   done
+
+  echo -e "$COMMENT" > "$OUTFILE"
+
+  if [ $HAS_DIFF -eq 1 ]; then
+    echo "diff=1" >> $GITHUB_OUTPUT
+  else
+    echo "diff=0" >> $GITHUB_OUTPUT
+  fi
+
+  echo "comment_file=$OUTFILE" >> $GITHUB_OUTPUT
+  echo "diff_file=$DIFFFILE" >> $GITHUB_OUTPUT
 }
 
 if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
