@@ -26,6 +26,7 @@ cdk_diff() {
 
   to_yaml "$BASE_ARG" "$TMPDIR/$BASE" || return 1
   to_yaml "$HEAD_ARG" "$TMPDIR/$HEAD" || return 1
+  really_to_yaml "$TMPDIR/$BASE" "$TMPDIR/$HEAD" || return 1
 
   cd "$TMPDIR" || return 1
 
@@ -41,7 +42,7 @@ cdk_diff() {
 
     # Determine how much room we have for the DIFF output
     SUMMARY_SIZE=$(diff_comment "$SUMMARY" "empty" | wc -c)
-    MAX_TOTAL=65500 # GH max comment size is 65536.
+    MAX_TOTAL=65450 # GH max comment size is 65536.
     REMAINING_LEN=$((MAX_TOTAL - SUMMARY_SIZE))
     # Comment will probably be too large, but lets not use negative numbers
     REMAINING_LEN=$((REMAINING_LEN < 10 ? 10 : REMAINING_LEN))
@@ -121,9 +122,8 @@ to_yaml() {
     NAME=$(basename "$TEMPLATE" | sed 's/\.template\.json/\.template\.yaml/')
     YAML_FILE="$2/$NAME"
 
-    echo "Converting $TEMPLATE to $YAML_FILE"
     if [[ ! -z "$CDK_DIFF_IGNORE_KEYS" ]]; then
-      JSON_DATA=$(cat $TEMPLATE)
+      JSON_DATA=$(cat "$TEMPLATE")
       JSON_FILE="$(mktemp)"
 
       for IGNORE_KEY in $(tr ',' '\n' <<< "$CDK_DIFF_IGNORE_KEYS"); do
@@ -132,14 +132,33 @@ to_yaml() {
           echo "jq command failed"
           exit 1
         fi
-        echo $JSON_DATA > $JSON_FILE
+        echo "$JSON_DATA" > "$JSON_FILE"
         TEMPLATE="$JSON_FILE"
       done
     fi
 
-    rain fmt "$TEMPLATE" > "$YAML_FILE"
+    cp "$TEMPLATE" "$YAML_FILE"
   done
   return 0
+}
+
+really_to_yaml() {
+  BASEDIR="$1"
+  HEADDIR="$2"
+  TEMPLATES=$(find "$1" -type f -name '*.template.yaml')
+  for TEMPLATE in $TEMPLATES; do
+    NAME=$(basename "$TEMPLATE")
+
+    # Skip if either file does not exist
+    if [ ! -f "$BASEDIR/$NAME" ] || [ ! -f "$HEADDIR/$NAME" ]; then
+      continue
+    fi
+
+    if has_diff "$BASEDIR/$NAME" "$HEADDIR/$NAME"; then
+      rain fmt -w "$BASEDIR/$NAME"
+      rain fmt -w "$HEADDIR/$NAME"
+    fi
+  done
 }
 
 if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
