@@ -27,8 +27,8 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - name: Install yq
-      run: ${{ github.action_path }}/install_yq.sh
+    - name: Install rain
+      run: ${{ github.action_path }}/install_rain.sh
       shell: bash
     - name: CDK diff
       id: diff

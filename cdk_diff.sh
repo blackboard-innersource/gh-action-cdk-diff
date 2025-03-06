@@ -24,8 +24,9 @@ cdk_diff() {
     return 1
   fi
 
-  to_yaml "$BASE_ARG" "$TMPDIR/$BASE" || return 1
-  to_yaml "$HEAD_ARG" "$TMPDIR/$HEAD" || return 1
+  copy_templates "$BASE_ARG" "$TMPDIR/$BASE" || return 1
+  copy_templates "$HEAD_ARG" "$TMPDIR/$HEAD" || return 1
+  to_yaml "$TMPDIR/$BASE" "$TMPDIR/$HEAD" || return 1
 
   cd "$TMPDIR" || return 1
 
@@ -37,8 +38,17 @@ cdk_diff() {
 
   if has_diff "$BASE" "$HEAD"; then
     echo "diff=1" >> $GITHUB_OUTPUT
-    OUTPUT=$(diff_output "$BASE" "$HEAD")
     SUMMARY=$(diff_summary "$BASE" "$HEAD")
+
+    # Determine how much room we have for the DIFF output
+    SUMMARY_SIZE=$(diff_comment "$SUMMARY" "empty" | wc -c)
+    MAX_TOTAL=65450 # GH max comment size is 65536.
+    REMAINING_LEN=$((MAX_TOTAL - SUMMARY_SIZE))
+    # Comment will probably be too large, but lets not use negative numbers
+    REMAINING_LEN=$((REMAINING_LEN < 10 ? 10 : REMAINING_LEN))
+
+    OUTPUT=$(diff_output "$BASE" "$HEAD" "$REMAINING_LEN")
+
     diff_comment "$SUMMARY" "$OUTPUT" > "$OUTFILE"
     diff -u "$BASE" "$HEAD" > "$DIFFFILE"
     return 0
@@ -100,8 +110,8 @@ $2
 EOF
 }
 
-# Used to convert JSON to YAML for shorter diffs
-to_yaml() {
+# Copy template files (with any ignore key edits) to a new directory - renaming them to .yaml
+copy_templates() {
   if [ -d "$2" ]; then
     echo "The '$2' directory already exists"
     return 1
@@ -112,9 +122,8 @@ to_yaml() {
     NAME=$(basename "$TEMPLATE" | sed 's/\.template\.json/\.template\.yaml/')
     YAML_FILE="$2/$NAME"
 
-    echo "Converting $TEMPLATE to $YAML_FILE"
     if [[ ! -z "$CDK_DIFF_IGNORE_KEYS" ]]; then
-      JSON_DATA=$(cat $TEMPLATE)
+      JSON_DATA=$(cat "$TEMPLATE")
       JSON_FILE="$(mktemp)"
 
       for IGNORE_KEY in $(tr ',' '\n' <<< "$CDK_DIFF_IGNORE_KEYS"); do
@@ -123,14 +132,39 @@ to_yaml() {
           echo "jq command failed"
           exit 1
         fi
-        echo $JSON_DATA > $JSON_FILE
+        echo "$JSON_DATA" > "$JSON_FILE"
         TEMPLATE="$JSON_FILE"
       done
     fi
 
-    yq r --prettyPrint "$TEMPLATE" > "$YAML_FILE"
+    cp "$TEMPLATE" "$YAML_FILE"
   done
   return 0
+}
+
+# Used to convert JSON to YAML for shorter diffs
+to_yaml() {
+  BASEDIR="$1"
+  HEADDIR="$2"
+  TEMPLATES=$(find "$BASEDIR" -type f -name '*.template.yaml')
+  PROCESSED=0
+
+  for TEMPLATE in $TEMPLATES; do
+    NAME=$(basename "$TEMPLATE")
+
+    # Skip if either file does not exist
+    if [ ! -f "$BASEDIR/$NAME" ] || [ ! -f "$HEADDIR/$NAME" ]; then
+      continue
+    fi
+
+    if ! cmp --silent -- "$BASEDIR/$NAME" "$HEADDIR/$NAME"; then
+      rain fmt -w "$BASEDIR/$NAME"
+      rain fmt -w "$HEADDIR/$NAME"
+      ((PROCESSED++))
+    fi
+  done
+
+  echo "🌧️  Rain processed $PROCESSED template files"
 }
 
 if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
