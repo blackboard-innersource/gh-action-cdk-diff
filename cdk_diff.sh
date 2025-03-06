@@ -197,14 +197,10 @@ diff_with_cdk() {
       COMMENT+="✅ No changes in stack: $STACKID\n\n"
       continue
     fi
-
     HAS_DIFF=1
-    COMMENT+="⚠️ Changes detected in stack: $STACKID\n\n"
-    COMMENT+="<details>\n<summary><b>CDK diff for $STACKID</b></summary>\n\n\`\`\`\n"
 
-    # Capture CDK diff output
-    CDK_OUTPUT=$(cdk diff -a "$BASEDIR" --template "$HEADDIR/$NAME" "$STACKID" 2>&1)
-    COMMENT+="$CDK_OUTPUT\n\`\`\`\n</details>\n\n"
+    CDK_OUTPUT=$(cdk diff -a "$BASEDIR" --template "$HEADDIR/$NAME" "$STACKID")
+    COMMENT+="<details>\n<summary><b>CDK diff for $STACKID</b></summary>\n\n\`\`\`\n$CDK_OUTPUT\n\`\`\`\n</details>\n\n"
   done
 
   echo -e "$COMMENT" > "$OUTFILE"
