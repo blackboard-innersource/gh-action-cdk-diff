@@ -16,8 +16,13 @@ cdk_diff() {
     return 1
   fi
 
-  BASE=$(basename "$BASE_ARG")
-  HEAD=$(basename "$HEAD_ARG")
+  if [ -n "$CDK_DIFF_RENAME" ]; then
+    BASE="base.cdk.out"
+    HEAD="head.cdk.out"
+  else
+    BASE=$(basename "$BASE_ARG")
+    HEAD=$(basename "$HEAD_ARG")
+  fi
 
   if [ "$BASE" = "$HEAD" ]; then
     echo "The 'base' and 'head' inputs point to the same base directory names"

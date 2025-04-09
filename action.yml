@@ -14,6 +14,9 @@ inputs:
       A comma-separated list of JSON/YAML keys to ignore in the diff output. Nested keys are supported using dot notation (e.g.,
       'Code.S3Key' will ignore any 'S3Key' properties that are nested under a 'Code' object).
     required: false
+  rename:
+    description: Rename base and head on copy instead of maintaining directory names - set to any value to enable
+    required: false
 outputs:
   has_diff:
     description: Has the value of 0 if no differences found or 1 if differences found
@@ -36,3 +39,4 @@ runs:
       shell: bash
       env:
         CDK_DIFF_IGNORE_KEYS: "${{ inputs.ignore-keys }}"
+        CDK_DIFF_RENAME: "${{ inputs.rename }}"
