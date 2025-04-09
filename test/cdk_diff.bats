@@ -99,9 +99,6 @@ EOF
   assert_output -p "Files base.cdk.out/example.template.yaml and head.cdk.out/example.template.yaml differ"
   assert_output -p "diff -u base.cdk.out/example.template.yaml head.cdk.out/example.template.yaml"
 
-  run cat "$TMPDIR/diff_comment.md"
-  assert_output -p "diff -u base.cdk.out/example.template.yaml head.cdk.out/example.template.yaml"
-
   # Confirm the output contains S3Key as we'll test ignoring it later
   run cat $TMPDIR/base.cdk.out/example.template.yaml
   assert_output --partial "S3Key:"
@@ -121,6 +118,18 @@ EOF
 
   run cat "$TMPDIR/diff_comment.md"
   assert_output ":star: No CloudFormation template differences found :star:"
+}
+
+@test "cdk_diff can rename on copy" {
+  CDK_DIFF_RENAME="1"
+  run cdk_diff test/fixtures/base.copy.cdk.out test/fixtures/head.cdk.out "$TMPDIR"
+  assert_success
+  assert [ -f "$TMPDIR/diff_comment.md" ]
+
+  run cat "$TMPDIR/diff_comment.md"
+  # We can see that base.copy.cdk.out is not used, rename occurs
+  assert_output -p "Files base.cdk.out/example.template.yaml and head.cdk.out/example.template.yaml differ"
+  assert_output -p "diff -u base.cdk.out/example.template.yaml head.cdk.out/example.template.yaml"
 }
 
 @test "cdk_diff errors when base is not a directory" {
