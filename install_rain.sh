@@ -12,17 +12,52 @@ download_rain() {
 verify_rain() {
   arch=$(arch_rain)
   if [ "$arch" = "arm64" ]; then
-    CHECKSUM="d65dad1afe77a93f2a9ab930be7bd15636bc9da32c91182a8945f4b17ce466718b1f3ac656429a7eba9b6c4c18ddbbbd9714e7ff1a7c168f3ee6aa93d6c99018"
+    CHECKSUM="7fe35e499510630a13f6fc39845a571c2a9fe99e8242ce0e3cfd4dbcc42fa647"
   else
     CHECKSUM="27a0673c2ee089328938ae27355349ee95e3156a351a543ef04e327279ee0e01"
   fi
   echo "🔒 Verifying checksum of rain ${arch}"
-  if ! echo "${CHECKSUM}  rain" | shasum -a 512 -c; then
-    echo "❌ Checksum verification failed!"
-    echo "Expected: ${CHECKSUM}"
-    echo "Actual:   $(shasum -a 512 rain | cut -d' ' -f1)"
+  verify_file "$CHECKSUM" "rain" || return 1
+}
+
+verify_file() {
+    local expected_hash="$1"
+    local file="$2"
+    local computed_hash
+
+    report_error() {
+        local tool="$1"
+        local computed="$2"
+        if [ "$computed" = "$expected_hash" ]; then
+            >&2 echo "✅ ${file}: OK"
+            return 0
+        fi
+        >&2 echo "Failed to verify checksum using $tool:"
+        >&2 echo "Expected: $expected_hash"
+        >&2 echo "Got:      $computed"
+        return 1
+    }
+
+    if command -v openssl >/dev/null 2>&1; then
+      computed_hash=$(openssl dgst -sha256 "$file" | cut -d' ' -f2)
+      report_error "openssl" "$computed_hash" && return 0
+      return 1
+    fi
+
+    if command -v shasum >/dev/null 2>&1; then
+        computed_hash=$(shasum -a 256 "$file" | cut -d' ' -f1)
+        report_error "shasum" "$computed_hash" && return 0
+        return 1
+    fi
+
+    if command -v sha256sum >/dev/null 2>&1; then
+        computed_hash=$(sha256sum "$file" | cut -d' ' -f1)
+        report_error "sha256sum" "$computed_hash" && return 0
+        return 1
+    fi
+
+    >&2 echo "No suitable hash verification tool found (tried openssl, shasum, and sha256sum)"
     return 1
-  fi
 }
 
 arch_rain() {
@@ -33,10 +68,26 @@ arch_rain() {
   fi
 }
 
-install_rain() {
-  echo "📦 Installing rain to /usr/local/bin"
-  sudo install -m +x rain "/usr/local/bin/rain"
-  rm -f rain
+install_binary() {
+  local dest dests
+
+  dests=("$HOME/bin" "/usr/local/bin" "/usr/bin" "/opt/bin")
+
+  for dest in "${dests[@]}"; do
+    # This if is testing if our destination is in the $PATH (start, middle, end)
+    if [[ "$PATH" == "${dest}:"*  ]] || [[ "$PATH" == *":${dest}:"*  ]] || [[ "$PATH" == *":${dest}"  ]]; then
+      if ! install --mode +x "$1" "$dest"; then
+        >&2 echo "Failed to install ${1} to ${dest}"
+        return 1
+      fi
+      rm -f "$1" # Install copies, not move
+      echo "📦 Installed ${1} to ${dest}"
+      return 0
+    fi
+  done
+
+  >&2 echo "Failed to install ${1}; None of these paths appear in \$PATH:" "${dests[@]}" "and \$PATH=${PATH}"
+  return 1
 }
 
 main() {
@@ -44,7 +95,7 @@ main() {
     echo "✅ Rain is already installed: $(rain --version)"
     return 0
   fi
-  download_rain && verify_rain && install_rain && rain --version
+  download_rain && verify_rain && install_binary "rain" && rain --version
 }
 
 if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
