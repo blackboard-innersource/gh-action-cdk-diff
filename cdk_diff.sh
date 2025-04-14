@@ -29,6 +29,11 @@ cdk_diff() {
     return 1
   fi
 
+  if [ -n "$CDK_DIFF_WITH_CDK" ]; then
+    diff_with_cdk "$BASE_ARG" "$HEAD_ARG" || return 1
+    return 0
+  fi
+
   copy_templates "$BASE_ARG" "$TMPDIR/$BASE" || return 1
   copy_templates "$HEAD_ARG" "$TMPDIR/$HEAD" || return 1
   to_yaml "$TMPDIR/$BASE" "$TMPDIR/$HEAD" || return 1
@@ -170,6 +175,69 @@ to_yaml() {
   done
 
   echo "🌧️  Rain processed $PROCESSED template files"
+}
+
+diff_with_cdk() {
+  BASEDIR="$1"
+  HEADDIR="$2"
+
+  OUTFILE="$TMPDIR/diff_comment.md"
+  DIFFFILE="$TMPDIR/synth.diff"
+  echo "comment_file=$OUTFILE" >> $GITHUB_OUTPUT
+  echo "diff_file=$DIFFFILE" >> $GITHUB_OUTPUT
+
+  MAX_TOTAL=65450 # GH max comment size is 65536.
+
+  COMMENT=":ghost: This pull request introduces changes to CloudFormation templates :ghost:\n\n"
+  HAS_DIFF=0
+
+  TEMPLATES=$(find "$BASEDIR" -type f -name '*.template.json' | sort)
+  for TEMPLATE in $TEMPLATES; do
+    NAME=$(basename "$TEMPLATE")
+    STACKID=$(basename "$TEMPLATE" ".template.json")
+
+    # Skip if either file does not exist
+    if [ ! -f "$HEADDIR/$NAME" ]; then
+      COMMENT+="Stack $STACKID only exists in BASE.\n\n"
+      continue
+    fi
+    if cmp --silent -- "$BASEDIR/$NAME" "$HEADDIR/$NAME"; then
+      COMMENT+="No changes for stack $STACKID.\n\n"
+      continue
+    fi
+    HAS_DIFF=1
+
+    CDK_OUTPUT=$(cdk diff -a "$BASEDIR" --template "$HEADDIR/$NAME" --exclusively "$STACKID")
+    NEWCOMMENT="$COMMENT<details>\n<summary><b>CDK diff for $STACKID</b></summary>\n\n\`\`\`\n$CDK_OUTPUT\n\`\`\`\n</details>\n\n"
+
+    if [ "${#NEWCOMMENT}" -gt "$MAX_TOTAL" ]; then
+      COMMENT+=":warning: Comment body too large, skipping additional stack diffs!\n"
+      break
+    fi
+    COMMENT="$NEWCOMMENT"
+  done
+
+  TEMPLATES=$(find "$HEADDIR" -type f -name '*.template.json' | sort)
+  for TEMPLATE in $TEMPLATES; do
+    NAME=$(basename "$TEMPLATE")
+    STACKID=$(basename "$TEMPLATE" ".template.json")
+
+    # Skip if either file does not exist
+    if [ ! -f "$BASEDIR/$NAME" ]; then
+      COMMENT+="Stack $STACKID only exists in HEAD.\n\n"
+      continue
+    fi
+  done
+
+  echo -e "$COMMENT" > "$OUTFILE"
+
+  if [ $HAS_DIFF -eq 1 ]; then
+    echo "diff=1" >> $GITHUB_OUTPUT
+  else
+    echo "diff=0" >> $GITHUB_OUTPUT
+    echo ":star: No CloudFormation template differences found :star:" > "$OUTFILE"
+    touch "$DIFFFILE"
+  fi
 }
 
 if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
