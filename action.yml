@@ -9,6 +9,10 @@ inputs:
     description: The cdk.out directory of the new synth
     required: true
     default: head.cdk.out
+  enable-comments:
+    description: Whether to create a comment on the pull request with the diff output
+    required: false
+    default: "false"
   ignore-keys:
     description: ->
       A comma-separated list of JSON/YAML keys to ignore in the diff output. Nested keys are supported using dot notation (e.g.,
@@ -40,3 +44,4 @@ runs:
       env:
         CDK_DIFF_IGNORE_KEYS: "${{ inputs.ignore-keys }}"
         CDK_DIFF_RENAME: "${{ inputs.rename }}"
+        CDK_DIFF_ENABLE_COMMENTS: "${{ inputs.enable-comments }}"

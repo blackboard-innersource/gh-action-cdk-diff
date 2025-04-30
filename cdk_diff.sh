@@ -56,6 +56,10 @@ cdk_diff() {
 
     diff_comment "$SUMMARY" "$OUTPUT" > "$OUTFILE"
     diff -u "$BASE" "$HEAD" > "$DIFFFILE"
+
+    if [[ -n "$CDK_DIFF_ENABLE_COMMENTS" ]]; then
+      create_or_update_pr_comment "$OUTFILE" "$DIFFFILE"
+    fi
     return 0
   fi
 
@@ -170,6 +174,36 @@ to_yaml() {
   done
 
   echo "🌧️  Rain processed $PROCESSED template files"
+}
+
+create_or_update_pr_comment() {
+  local comment_file=$1
+  local diff_file=$2
+
+  local pr_number
+  pr_number=$(jq -r .pull_request.number "$GITHUB_EVENT_PATH")
+
+  if [ -z "$pr_number" ]; then
+    echo "No pull request number found in GITHUB_EVENT_PATH"
+    return 1
+  fi
+
+  local repo_url
+  repo_url=$(jq -r .repository.html_url "$GITHUB_EVENT_PATH")
+
+  # Check if the comment already exists
+  local existing_comment_id
+  existing_comment_id=$(gh pr view "$pr_number" --json comments | jq --arg diff_file "$diff_file" -r '.comments[] | select(.body | contains("CDK synth diff") and .body | contains($diff_file)) | .id')
+
+  if [ -n "$existing_comment_id" ]; then
+    # Update the existing comment
+    echo "Updating existing comment $repo_url/pull/$pr_number#issuecomment-$existing_comment_id"
+    gh pr comment "$pr_number" --edit --comment-id "$existing_comment_id" --body-file "$comment_file"
+  else
+    # Create a new comment
+    echo "Creating a new comment for pr number $repo_url/pull/$pr_number"
+    gh pr comment "$pr_number" --body-file "$comment_file"
+  fi
 }
 
 if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
