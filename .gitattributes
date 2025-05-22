@@ -3,6 +3,7 @@
 * text=auto eol=lf
 /.gitattributes linguist-generated
 /.gitignore linguist-generated
+/.husky/pre-commit linguist-generated
 /.npmignore linguist-generated
 /.projen/** linguist-generated
 /.projen/deps.json linguist-generated

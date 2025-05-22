@@ -51,13 +51,12 @@
       "type": "build"
     },
     {
-      "name": "commit-and-tag-version",
-      "version": "^12",
+      "name": "constructs",
+      "version": "^10.0.0",
       "type": "build"
     },
     {
-      "name": "constructs",
-      "version": "^10.0.0",
+      "name": "esbuild",
       "type": "build"
     },
     {
@@ -79,6 +78,14 @@
     {
       "name": "eslint",
       "version": "^9",
+      "type": "build"
+    },
+    {
+      "name": "husky",
+      "type": "build"
+    },
+    {
+      "name": "lint-staged",
       "type": "build"
     },
     {

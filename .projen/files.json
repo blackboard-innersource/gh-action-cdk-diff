@@ -2,6 +2,7 @@
   "files": [
     ".gitattributes",
     ".gitignore",
+    ".husky/pre-commit",
     ".npmignore",
     ".projen/deps.json",
     ".projen/files.json",

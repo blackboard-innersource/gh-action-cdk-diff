@@ -33,4 +33,4 @@ outputs:
     description: Has the value of false if no differences found or true if differences found
 runs:
   using: "node20"
-  main: "src/index.mjs"
+  main: "dist/index.js"

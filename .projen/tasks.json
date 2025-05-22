@@ -24,23 +24,32 @@
         }
       ]
     },
-    "bump": {
-      "name": "bump",
-      "description": "Bumps version based on latest git tag and generates a changelog entry",
-      "env": {
-        "OUTFILE": "package.json",
-        "CHANGELOG": "dist/changelog.md",
-        "BUMPFILE": "dist/version.txt",
-        "RELEASETAG": "dist/releasetag.txt",
-        "RELEASE_TAG_PREFIX": "",
-        "BUMP_PACKAGE": "commit-and-tag-version@^12"
-      },
+    "bundle": {
+      "name": "bundle",
+      "description": "Prepare assets",
       "steps": [
         {
-          "builtin": "release/bump-version"
+          "spawn": "bundle:index"
         }
-      ],
-      "condition": "git log --oneline -1 | grep -qv \"chore(release):\""
+      ]
+    },
+    "bundle:index": {
+      "name": "bundle:index",
+      "description": "Create a JavaScript bundle from src/index.ts",
+      "steps": [
+        {
+          "exec": "esbuild --bundle src/index.ts --target=\"node20\" --platform=\"node\" --outfile=\"dist/index.js\" --external:@actions/core --external:@actions/github --external:@actions/exec --external:@actions/io --external:@actions/tool-cache --external:fs --external:fsevents --sourcemap"
+        }
+      ]
+    },
+    "bundle:index:watch": {
+      "name": "bundle:index:watch",
+      "description": "Continuously update the JavaScript bundle from src/index.ts",
+      "steps": [
+        {
+          "exec": "esbuild --bundle src/index.ts --target=\"node20\" --platform=\"node\" --outfile=\"dist/index.js\" --external:@actions/core --external:@actions/github --external:@actions/exec --external:@actions/io --external:@actions/tool-cache --external:fs --external:fsevents --sourcemap --watch"
+        }
+      ]
     },
     "clobber": {
       "name": "clobber",
@@ -76,12 +85,7 @@
     },
     "compile": {
       "name": "compile",
-      "description": "Only compile",
-      "steps": [
-        {
-          "exec": "tsc --build"
-        }
-      ]
+      "description": "Only compile"
     },
     "default": {
       "name": "default",
@@ -124,15 +128,7 @@
     },
     "package": {
       "name": "package",
-      "description": "Creates the distribution package",
-      "steps": [
-        {
-          "exec": "mkdir -p dist/js"
-        },
-        {
-          "exec": "npm pack --pack-destination dist/js"
-        }
-      ]
+      "description": "Creates the distribution package"
     },
     "post-compile": {
       "name": "post-compile",
@@ -144,53 +140,16 @@
     },
     "pre-compile": {
       "name": "pre-compile",
-      "description": "Prepare the project for compilation"
-    },
-    "release": {
-      "name": "release",
-      "description": "Prepare a release from \"main\" branch",
-      "env": {
-        "RELEASE": "true",
-        "MAJOR": "1"
-      },
+      "description": "Prepare the project for compilation",
       "steps": [
         {
-          "exec": "rm -fr dist"
-        },
-        {
-          "spawn": "bump"
-        },
-        {
-          "spawn": "build"
-        },
-        {
-          "spawn": "unbump"
-        },
-        {
-          "exec": "git diff --ignore-space-at-eol --exit-code"
+          "spawn": "bundle"
         }
       ]
     },
     "test": {
       "name": "test",
       "description": "Run tests"
-    },
-    "unbump": {
-      "name": "unbump",
-      "description": "Restores version to 0.0.0",
-      "env": {
-        "OUTFILE": "package.json",
-        "CHANGELOG": "dist/changelog.md",
-        "BUMPFILE": "dist/version.txt",
-        "RELEASETAG": "dist/releasetag.txt",
-        "RELEASE_TAG_PREFIX": "",
-        "BUMP_PACKAGE": "commit-and-tag-version@^12"
-      },
-      "steps": [
-        {
-          "builtin": "release/reset-version"
-        }
-      ]
     },
     "upgrade": {
       "name": "upgrade",
@@ -200,13 +159,13 @@
       },
       "steps": [
         {
-          "exec": "npx npm-check-updates@16 --upgrade --target=minor --peer --no-deprecated --dep=dev,peer,prod,optional --filter=@bb-fnds/projen,@eslint/js,@swc/core,@swc/jest,@types/diff,@types/fs-extra,@typescript-eslint/parser,action-docs,aws-sdk,aws-sdk-client-mock,eslint-config-prettier,eslint-import-resolver-typescript,eslint-plugin-import-x,eslint-plugin-prettier,prettier,projen,projen-github-action-typescript,ts-node,typescript,typescript-eslint,@actions/core,@actions/github,@aws-cdk/cloud-assembly-schema,@aws-cdk/cloudformation-diff,@aws-cdk/cx-api,@aws-cdk/toolkit-lib,@aws-sdk/client-cloudformation,@aws-sdk/client-sts,@aws-sdk/credential-providers,@octokit/webhooks-definitions,@smithy/types,diff,fs-extra,glob-promise"
+          "exec": "npx npm-check-updates@16 --upgrade --target=minor --peer --no-deprecated --dep=dev,peer,prod,optional --filter=@bb-fnds/projen,@eslint/js,@swc/core,@swc/jest,@types/diff,@types/fs-extra,@typescript-eslint/parser,action-docs,aws-sdk,aws-sdk-client-mock,esbuild,eslint-config-prettier,eslint-import-resolver-typescript,eslint-plugin-import-x,eslint-plugin-prettier,husky,lint-staged,prettier,projen,projen-github-action-typescript,ts-node,typescript,typescript-eslint,@actions/core,@actions/github,@aws-cdk/cloud-assembly-schema,@aws-cdk/cloudformation-diff,@aws-cdk/cx-api,@aws-cdk/toolkit-lib,@aws-sdk/client-cloudformation,@aws-sdk/client-sts,@aws-sdk/credential-providers,@octokit/webhooks-definitions,@smithy/types,diff,fs-extra,glob-promise"
         },
         {
           "exec": "npm install"
         },
         {
-          "exec": "npm update @bb-fnds/projen @eslint/js @swc/core @swc/jest @types/diff @types/fs-extra @types/mock-fs @types/node @typescript-eslint/parser action-docs aws-sdk aws-sdk-client-mock commit-and-tag-version constructs eslint-config-prettier eslint-import-resolver-typescript eslint-plugin-import-x eslint-plugin-prettier eslint mock-fs prettier projen projen-github-action-typescript ts-node typescript typescript-eslint @actions/core @actions/exec @actions/github @actions/io @actions/tool-cache @aws-cdk/cloud-assembly-schema @aws-cdk/cloudformation-diff @aws-cdk/cx-api @aws-cdk/toolkit-lib @aws-sdk/client-cloudformation @aws-sdk/client-sts @aws-sdk/credential-providers @octokit/webhooks-definitions @smithy/types chalk diff fs-extra glob-promise"
+          "exec": "npm update @bb-fnds/projen @eslint/js @swc/core @swc/jest @types/diff @types/fs-extra @types/mock-fs @types/node @typescript-eslint/parser action-docs aws-sdk aws-sdk-client-mock constructs esbuild eslint-config-prettier eslint-import-resolver-typescript eslint-plugin-import-x eslint-plugin-prettier eslint husky lint-staged mock-fs prettier projen projen-github-action-typescript ts-node typescript typescript-eslint @actions/core @actions/exec @actions/github @actions/io @actions/tool-cache @aws-cdk/cloud-assembly-schema @aws-cdk/cloudformation-diff @aws-cdk/cx-api @aws-cdk/toolkit-lib @aws-sdk/client-cloudformation @aws-sdk/client-sts @aws-sdk/credential-providers @octokit/webhooks-definitions @smithy/types chalk diff fs-extra glob-promise"
         },
         {
           "exec": "npx projen"
