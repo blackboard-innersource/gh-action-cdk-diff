@@ -133,18 +133,18 @@ export class AssemblyReader {
 
   private createSymlinks(stackTemplatesFiles: string[], assemblyTemplateFiles: string[]) {
     for (const templateFile of stackTemplatesFiles) {
-      fs.symlinkSync(templateFile, path.join(this.tmpdir, path.basename(templateFile)), 'file');
+      fs.symlinkSync(path.resolve(templateFile), path.join(this.tmpdir, path.basename(templateFile)), 'file');
     }
 
     for (const templateFile of assemblyTemplateFiles) {
       const targetPath = path.join(this.tmpdir, path.basename(path.dirname(templateFile)), path.basename(templateFile));
-      const fullTemplateFile = path.join(this.assemblyPath, path.basename(templateFile));
+      const resolvedTemplateFile = path.resolve(templateFile);
 
-      console.log('Creating symlink', targetPath, '->', fullTemplateFile);
+      console.log('Creating symlink', targetPath, '->', resolvedTemplateFile);
 
       fs.mkdirSync(path.dirname(targetPath), { recursive: true });
 
-      fs.symlinkSync(fullTemplateFile, targetPath, 'file');
+      fs.symlinkSync(resolvedTemplateFile, targetPath, 'file');
     }
   }
 }
