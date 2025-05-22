@@ -132,7 +132,7 @@ export async function run() {
       }
 
       stackResults[stackName] = diff;
-      comments.push(new StackDiffComment(octokit, stackName, diff));
+      comments.push(new StackDiffComment(stackName, diff));
     } catch (e: unknown) {
       if (e instanceof Error) {
         stackResults[stackName] = e;
@@ -157,7 +157,7 @@ export async function run() {
 
   if (!inputs.disableComments) {
     try {
-      const updater = new CommentUpdater(comments);
+      const updater = new CommentUpdater(octokit, comments);
 
       await updater.updateComments();
     } catch (e) {
