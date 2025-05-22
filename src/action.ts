@@ -29,15 +29,19 @@ export interface Inputs {
   head: string;
 
   /**
-   * Whether or not to enable labels on the PR.
+   * If true, comments will not be created on the PR.
    */
-  enableLabels: boolean;
+  disableComments: boolean;
 
   /**
-   * Enabling the summarize flag will create a summary comment with the number of resources that are being added,
-   * updated, or for each stack.
+   * If true, labels will not be added to the PR.
    */
-  enableSummary: boolean;
+  disableLabels: boolean;
+
+  /**
+   * If true, the summary comment will not be created.
+   */
+  disableSummary: boolean;
 
   /**
    * A list of CloudFormation resource types to ignore when calculating the diff. The format is:
@@ -58,8 +62,9 @@ export async function run() {
     base: getInput('base', { required: true }),
     githubToken: getInput('githubToken', { required: true }),
     head: getInput('head', { required: true }),
-    enableLabels: getInput('enableLabels', { required: false }) ? getBooleanInput('enableLabels') : true,
-    enableSummary: getInput('enableSummary', { required: false }) ? getBooleanInput('enableSummary') : true,
+    disableComments: getInput('disableComments', { required: false }) ? getBooleanInput('disableComments') : true,
+    disableLabels: getInput('disableLabels', { required: false }) ? getBooleanInput('disableLabels') : true,
+    disableSummary: getInput('disableSummary', { required: false }) ? getBooleanInput('disableSummary') : true,
     ignoreChanges: getMultilineInput('ignoreChanges'),
     ignoreAssetOnlyChanges: getInput('ignoreAssetOnlyChanges', { required: false })
       ? getBooleanInput('ignoreAssetOnlyChanges')
@@ -98,6 +103,7 @@ export async function run() {
   const stacks = headAssembly.cloudAssembly.cloudAssembly.stacks;
 
   let hasChanges = false;
+  let hasDestructiveChanges = false;
   let hasSecurityGroupChanges = false;
   let hasIamChanges = false;
   for (const stack of stacks.values()) {
@@ -121,6 +127,10 @@ export async function run() {
         hasIamChanges = true;
       }
 
+      if (diff.changes.destructiveChanges.length > 0) {
+        hasDestructiveChanges = true;
+      }
+
       stackResults[stackName] = diff;
       comments.push(new StackDiffComment(octokit, stackName, diff));
     } catch (e: unknown) {
@@ -135,24 +145,37 @@ export async function run() {
   }
 
   setOutput('has-changes', hasChanges);
+  setOutput('has-destructive-changes', hasDestructiveChanges);
   setOutput('has-iam-changes', hasIamChanges);
   setOutput('has-security-group-changes', hasSecurityGroupChanges);
 
-  comments.unshift(new SummaryComment(octokit, stackResults));
-
-  try {
-    const updater = new CommentUpdater(comments);
-
-    await updater.updateComments();
-  } catch (e) {
-    error(`Error updating comments: ${e}`);
+  if (!inputs.disableSummary) {
+    comments.unshift(new SummaryComment(octokit, stackResults));
+  } else {
+    debug('Summary comment is disabled, skipping summary comment');
   }
 
-  try {
-    const labeler = new Labeler(octokit);
+  if (!inputs.disableComments) {
+    try {
+      const updater = new CommentUpdater(comments);
 
-    await labeler.process(stackResults);
-  } catch (e) {
-    error(`Error labeling PR: ${e}`);
+      await updater.updateComments();
+    } catch (e) {
+      error(`Error updating comments: ${e}`);
+    }
+  } else {
+    debug('Comments are disabled, skipping comment updater');
+  }
+
+  if (!inputs.disableLabels) {
+    try {
+      const labeler = new Labeler(octokit);
+
+      await labeler.process(stackResults);
+    } catch (e) {
+      error(`Error labeling PR: ${e}`);
+    }
+  } else {
+    debug('Labeling is disabled, skipping labeler');
   }
 }
