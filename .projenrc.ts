@@ -91,7 +91,7 @@ project.package.addField('lint-staged', {
 project.addScripts({ prepare: 'husky' });
 
 new TextFile(project, '.husky/pre-commit', {
-  lines: ['projen', 'npx lint-staged', 'npm run build'],
+  lines: ['projen', 'npx lint-staged', 'npm run build', 'git add dist'],
 });
 
 project.synth();
