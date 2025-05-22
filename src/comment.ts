@@ -1,6 +1,7 @@
 import * as crypto from 'node:crypto';
 import { Writable, WritableOptions } from 'stream';
 import { StringDecoder } from 'string_decoder';
+import { info } from '@actions/core';
 import * as github from '@actions/github';
 import { GitHub } from '@actions/github/lib/utils';
 import { ChangeDetails, StackDiffInfo } from './stack-diff';
@@ -63,7 +64,7 @@ export abstract class Comment {
   }
 
   get hash() {
-    return crypto.createHash('sha256').update(this.content).digest('hex');
+    return crypto.createHash('sha1').update(this.id).digest('hex');
   }
 
   public async updatePullRequest(): Promise<void> {
@@ -86,8 +87,10 @@ export abstract class Comment {
     const commentId = await this.findPreviousComment();
 
     if (!commentId) {
+      info(`No previous comment found, creating a new one`);
       await this.octokit.rest.issues.createComment({ ...payload, issue_number: this.issueNumber });
     } else {
+      info(`Updating existing comment with ID ${commentId}`);
       await this.octokit.rest.issues.updateComment({ ...payload, comment_id: commentId });
     }
   }
