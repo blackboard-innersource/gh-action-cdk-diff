@@ -75,13 +75,12 @@ export abstract class Comment {
       console.log('Comment exceeds maximum length and will be truncated');
       const trailer = '!!! TRUNCATED !!!'.repeat(3);
 
-      body =
-        body.slice(0, MAX_COMMENT_LENGTH - trailer.length - generatedMessage.length - 2) + trailer + generatedMessage;
+      body = body.slice(0, MAX_COMMENT_LENGTH - trailer.length - generatedMessage.length - 2) + trailer;
     }
 
     const payload = {
       ...github.context.repo,
-      body,
+      body: `${body}\n${generatedMessage}`,
     };
 
     const commentId = await this.findPreviousComment();
