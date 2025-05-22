@@ -19,14 +19,6 @@ export interface Inputs {
   githubToken: string;
 
   /**
-   * A list of CloudFormation resource types that are allowed to be destroyed even if `failOnDestructiveChanges` is
-   * set to true.
-   *
-   * @default - there are no allowed destroy types
-   */
-  allowDestructionOf: string[];
-
-  /**
    * The location of the base CDK output directory
    */
   base: string;
@@ -63,7 +55,6 @@ export interface Inputs {
 
 export async function run() {
   const inputs: Inputs = {
-    allowDestructionOf: getMultilineInput('allowDestructionOf'),
     base: getInput('base', { required: true }),
     githubToken: getInput('githubToken', { required: true }),
     head: getInput('head', { required: true }),
