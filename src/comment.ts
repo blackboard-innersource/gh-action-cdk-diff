@@ -67,18 +67,16 @@ export abstract class Comment {
   }
 
   public async updatePullRequest(): Promise<void> {
-    let body = [
-      `<!-- cdk diff action with id ${this.id} ${this.hash} -->`,
-      this.content,
-      '',
-      `_Generated for commit ${this.commitSha}_`,
-    ].join('\n');
+    let body = [`<!-- cdk diff action with id ${this.id} ${this.hash} -->`, this.content, ''].join('\n');
+
+    const generatedMessage = `_Generated for commit ${this.commitSha}_`;
 
     if (body.length > MAX_COMMENT_LENGTH) {
       console.log('Comment exceeds maximum length and will be truncated');
       const trailer = '!!! TRUNCATED !!!'.repeat(3);
 
-      body = body.slice(0, MAX_COMMENT_LENGTH - trailer.length) + trailer;
+      body =
+        body.slice(0, MAX_COMMENT_LENGTH - trailer.length - generatedMessage.length - 2) + trailer + generatedMessage;
     }
 
     const payload = {
@@ -131,9 +129,9 @@ export abstract class Comment {
     } else if (changes.updatedResources) {
       return ':yellow_circle:';
     } else if (changes.createdResources) {
-      return ':sparkle:';
+      return ':white_check_mark:';
     }
-    return ':white_check_mark:';
+    return ':green_apple:';
   }
 
   private async findPreviousComment() {

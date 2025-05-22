@@ -32,9 +32,9 @@ export class SummaryComment extends Comment {
     output.push(...['<details>', '<summary>Summary of changes</summary>']);
     for (const [stackName, diff] of stackDiffs) {
       if (!(diff instanceof Error)) {
-        output.push(...[`:${emoji}: ***Stack***: ${diff.stackName}: ` + this.getDiffSummary(diff)]);
+        output.push(...[`### ${emoji} ***Stack***: ${diff.stackName}\n> ` + this.getDiffSummary(diff)]);
       } else {
-        output.push(...[`:fire: ***Stack***: ${stackName}\n> Error: ${diff.message}`]);
+        output.push(...[`### :fire: ***Stack***: ${stackName}\n> Error: ${diff.message}`]);
       }
     }
     output.push('</details>');

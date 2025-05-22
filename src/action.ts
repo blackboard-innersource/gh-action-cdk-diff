@@ -62,9 +62,9 @@ export async function run() {
     base: getInput('base', { required: true }),
     githubToken: getInput('github-token', { required: true }), // Change from githubToken to github-token
     head: getInput('head', { required: true }),
-    disableComments: getInput('disable-comments', { required: false }) ? getBooleanInput('disable-comments') : true,
-    disableLabels: getInput('disable-labels', { required: false }) ? getBooleanInput('disable-labels') : true,
-    disableSummary: getInput('disable-summary', { required: false }) ? getBooleanInput('disable-summary') : true,
+    disableComments: getInput('disable-comments', { required: false }) ? getBooleanInput('disable-comments') : false,
+    disableLabels: getInput('disable-labels', { required: false }) ? getBooleanInput('disable-labels') : false,
+    disableSummary: getInput('disable-summary', { required: false }) ? getBooleanInput('disable-summary') : false,
     ignoreChanges: getMultilineInput('ignore-changes'),
     ignoreAssetOnlyChanges: getInput('ignore-asset-only-changes', { required: false })
       ? getBooleanInput('ignore-asset-only-changes')
