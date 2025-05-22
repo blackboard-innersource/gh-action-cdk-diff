@@ -69,7 +69,7 @@ export abstract class Comment {
   public async updatePullRequest(): Promise<void> {
     let body = [
       `<!-- cdk diff action with id ${this.id} ${this.hash} -->`,
-      ...this.content,
+      this.content,
       '',
       `_Generated for commit ${this.commitSha}_`,
     ].join('\n');
