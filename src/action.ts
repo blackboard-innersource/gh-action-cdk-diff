@@ -4,6 +4,7 @@ import { NonInteractiveIoHost, Toolkit } from '@aws-cdk/toolkit-lib';
 import { AssemblyReader } from './assembly-reader';
 import { Comment } from './comment';
 import { CommentUpdater } from './comment-updater';
+import { Labeler } from './labeler';
 import { StackDiff, StackDiffInfo } from './stack-diff';
 import { StackDiffComment } from './stack-diff-comment';
 import { SummaryComment } from './summary-comment';
@@ -36,10 +37,15 @@ export interface Inputs {
   head: string;
 
   /**
+   * Whether or not to enable labels on the PR.
+   */
+  enableLabels: boolean;
+
+  /**
    * Enabling the summarize flag will create a summary comment with the number of resources that are being added,
    * updated, or for each stack.
    */
-  summarize: boolean;
+  enableSummary: boolean;
 
   /**
    * A list of CloudFormation resource types to ignore when calculating the diff. The format is:
@@ -61,7 +67,8 @@ export async function run() {
     base: getInput('base', { required: true }),
     githubToken: getInput('githubToken', { required: true }),
     head: getInput('head', { required: true }),
-    summarize: getInput('summarize', { required: false }) ? getBooleanInput('summarize') : true,
+    enableLabels: getInput('enableLabels', { required: false }) ? getBooleanInput('enableLabels') : true,
+    enableSummary: getInput('enableSummary', { required: false }) ? getBooleanInput('enableSummary') : true,
     ignoreChanges: getMultilineInput('ignoreChanges'),
     ignoreAssetOnlyChanges: getInput('ignoreAssetOnlyChanges', { required: false })
       ? getBooleanInput('ignoreAssetOnlyChanges')
@@ -148,5 +155,13 @@ export async function run() {
     await updater.updateComments();
   } catch (e) {
     error(`Error updating comments: ${e}`);
+  }
+
+  try {
+    const labeler = new Labeler(octokit);
+
+    await labeler.process(stackResults);
+  } catch (e) {
+    error(`Error labeling PR: ${e}`);
   }
 }

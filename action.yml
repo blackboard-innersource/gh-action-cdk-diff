@@ -16,7 +16,7 @@ inputs:
     description: If true, the action will fail if any destructive changes are found in the diff.
     required: false
     default: "true"
-  summarize:
+  enable-summary:
     description: If true, the action will summarize the diff output via a special PR comment. This is useful for large diffs.
     required: false
     default: "true"
