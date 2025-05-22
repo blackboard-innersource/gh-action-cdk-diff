@@ -23,7 +23,7 @@ export class SummaryComment extends Comment {
       return output.join('\n');
     }
 
-    output.push(...['<details>', '<summary>Details</summary>', '</details>']);
+    output.push(...['<details>', '<summary>Summary of changes</summary>', '</details>']);
     for (const [stackName, diff] of stackDiffs) {
       if (!(diff instanceof Error)) {
         output.push(...[`***${diff.stackName}:*** ` + this.getDiffSummary(diff)]);
