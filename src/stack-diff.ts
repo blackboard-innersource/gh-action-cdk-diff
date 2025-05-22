@@ -1,4 +1,5 @@
 import * as core from '@actions/core';
+import { info } from '@actions/core';
 import {
   DifferenceCollection,
   PropertyDifference,
@@ -99,6 +100,8 @@ export class StackDiff {
     if (!baseStack) {
       throw new Error(`Stack ${stackName} not found in base assembly`);
     }
+
+    info(`Diffing stack ${stackName} between ${headStack.templateFullPath} and ${baseStack.templateFullPath}`);
 
     const diffResults = await this.toolkit.diff(this.headAssembly.cloudAssemblySource, {
       method: DiffMethod.LocalFile(baseStack.templateFullPath),

@@ -35,12 +35,40 @@ inputs:
 outputs:
   has-changes:
     description: Has the value of false if no differences found or true if differences found
+    value: steps.cdk-diff.outputs.has-changes
   has-destructive-changes:
     description: Has the value of false if no differences found or true if differences found
+    value: steps.cdk-diff.outputs.has-destructive-changes
   has-security-group-changes:
     description: Has the value of false if no differences found or true if differences found
+    value: steps.cdk-diff.outputs.has-security-group-changes
   has-iam-changes:
     description: Has the value of false if no differences found or true if differences found
+    value: steps.cdk-diff.outputs.has-iam-changes
 runs:
-  using: "node20"
-  main: "dist/index.js"
+  using: "composite"
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Install dependencies
+      shell: bash
+      run: |
+        npm ci
+        npm install -g ts-node typescript
+
+    - name: Run CDK Diff
+      id: cdk-diff
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+        BASE_PATH: ${{ inputs.base }}
+        HEAD_PATH: ${{ inputs.head }}
+        DISABLE_COMMENTS: ${{ inputs.disable-comments }}
+        DISABLE_LABELS: ${{ inputs.disable-labels }}
+        DISABLE_SUMMARY: ${{ inputs.disable-summary }}
+        IGNORE_CHANGES: ${{ inputs.ignore-changes }}
+        IGNORE_ASSET_CHANGES: ${{ inputs.ignore-asset-only-changes }}
+      run: ts-node src/index.ts
