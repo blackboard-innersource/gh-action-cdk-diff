@@ -20,24 +20,37 @@ export class Labeler {
     );
 
     const labels = await this.getLabels();
+    const labelsToAdd = new Set<string>();
     const labelsToDelete = new Set<string>();
 
     if (hasDestructiveChanges) {
-      labels.add('destructive');
+      if (!labels.has('destructive')) {
+        labelsToAdd.add('destructive');
+      }
     } else {
-      labelsToDelete.add('destructive');
+      if (labels.has('destructive')) {
+        labelsToDelete.add('destructive');
+      }
     }
 
     if (hasIamChanges) {
-      labels.add('iam');
+      if (!labels.has('iam')) {
+        labelsToAdd.add('iam');
+      }
     } else {
-      labelsToDelete.add('iam');
+      if (labels.has('iam')) {
+        labelsToDelete.add('iam');
+      }
     }
 
     if (hasSecurityGroupChanges) {
-      labels.add('networking');
+      if (!labels.has('security-groups')) {
+        labelsToAdd.add('security-groups');
+      }
     } else {
-      labelsToDelete.add('networking');
+      if (labels.has('security-groups')) {
+        labelsToDelete.add('security-groups');
+      }
     }
 
     if (labels.size > 0) {

@@ -28,12 +28,12 @@ inputs:
     required: false
     default: "false"
 outputs:
-  has_diff:
-    description: Has the value of 0 if no differences found or 1 if differences found
-  comment_file:
-    description: A file with markdown that contains details about the diff
-  diff_file:
-    description: A file that contains the unaltered diff output
+  has-changes:
+    description: Has the value of false if no differences found or true if differences found
+  has-security-group-changes:
+    description: Has the value of false if no differences found or true if differences found
+  has-iam-changes:
+    description: Has the value of false if no differences found or true if differences found
 runs:
   using: "node20"
   main: "src/index.mjs"

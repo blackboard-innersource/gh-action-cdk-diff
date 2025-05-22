@@ -144,8 +144,8 @@ export async function run() {
   }
 
   setOutput('has-changes', hasChanges);
-  setOutput('has-security-changes', hasSecurityGroupChanges);
   setOutput('has-iam-changes', hasIamChanges);
+  setOutput('has-security-group-changes', hasSecurityGroupChanges);
 
   comments.unshift(new SummaryComment(octokit, stackResults));
 
