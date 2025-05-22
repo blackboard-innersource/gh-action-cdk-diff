@@ -138,12 +138,13 @@ export class AssemblyReader {
 
     for (const templateFile of assemblyTemplateFiles) {
       const targetPath = path.join(this.tmpdir, path.basename(path.dirname(templateFile)), path.basename(templateFile));
+      const fullTemplateFile = path.join(this.assemblyPath, path.basename(templateFile));
 
-      console.log('Creating symlink', targetPath, '->', templateFile);
+      console.log('Creating symlink', targetPath, '->', fullTemplateFile);
 
       fs.mkdirSync(path.dirname(targetPath), { recursive: true });
 
-      fs.symlinkSync(templateFile, targetPath, 'file');
+      fs.symlinkSync(fullTemplateFile, targetPath, 'file');
     }
   }
 }
