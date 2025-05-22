@@ -92,34 +92,48 @@ export abstract class Comment {
     }
   }
 
-  public getDiffSummary(diff: StackDiffInfo): string {
+  public getDiffSummary(diff: StackDiffInfo[]): string[] {
     const segments: string[] = [];
 
-    if (diff.changes.createdResources > 0) {
-      segments.push(`:sparkle: ${diff.changes.createdResources} to add`);
+    let createdResources = 0;
+    let updatedResources = 0;
+    let removedResources = 0;
+    let hasChanges = false;
+    let securityGroupChanges = 0;
+    let iamChanges = 0;
+    for (const d of diff) {
+      createdResources += d.changes.createdResources;
+      updatedResources += d.changes.updatedResources;
+      removedResources += d.changes.removedResources;
+      hasChanges = hasChanges || d.changes.hasChanges;
+      securityGroupChanges += d.diff.securityGroupChanges.hasChanges ? 1 : 0;
+      iamChanges += d.diff.iamChanges.hasChanges ? 1 : 0;
+    }
+    if (createdResources > 0) {
+      segments.push(`:sparkle: ${createdResources} to add`);
     }
 
-    if (diff.changes.updatedResources > 0) {
-      segments.push(`:yellow_circle: ${diff.changes.updatedResources} to update`);
+    if (updatedResources > 0) {
+      segments.push(`:yellow_circle: ${updatedResources} to update`);
     }
 
-    if (diff.changes.removedResources > 0) {
-      segments.push(`:x: ${diff.changes.removedResources} to destroy`);
+    if (removedResources > 0) {
+      segments.push(`:x: ${removedResources} to destroy`);
     }
 
-    if (diff.diff.securityGroupChanges.hasChanges) {
+    if (securityGroupChanges) {
       segments.push(`:lock: Security group changes detected`);
     }
 
-    if (diff.diff.iamChanges.hasChanges) {
+    if (iamChanges) {
       segments.push(`:lock: IAM changes detected`);
     }
 
-    if (!diff.changes.createdResources && !diff.changes.updatedResources && !diff.changes.removedResources) {
+    if (!createdResources && !updatedResources && !removedResources) {
       segments.push(':white_check_mark: No changes');
     }
 
-    return segments.join(', ');
+    return segments;
   }
 
   protected getEmoji(changes: ChangeDetails): string {

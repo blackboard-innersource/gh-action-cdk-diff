@@ -27,7 +27,7 @@ export class StackDiffComment extends Comment {
 
     output.push(
       ...[
-        `#### ${emoji} Diff for stack ***${this.stackName}***: ${this.getDiffSummary(this.stackDiff)} `,
+        `#### ${emoji} Diff for stack ***${this.stackName}***: ${this.getDiffSummary([this.stackDiff]).join(', ')} `,
         '<details>',
         '<summary>Details</summary>',
         '',

@@ -49,6 +49,10 @@ export interface ChangeDetails {
    */
   destructiveChanges: DestructiveChange[];
 
+  iamChanges: number;
+
+  securityGroupChanges: number;
+
   /**
    * Returns true if there are changes.
    */
@@ -111,6 +115,8 @@ export class StackDiff {
       removedResources: 0,
       updatedResources: 0,
       destructiveChanges: [],
+      iamChanges: 0,
+      securityGroupChanges: 0,
       hasChanges: false,
     };
 

@@ -29,11 +29,20 @@ export class SummaryComment extends Comment {
 
     const emoji = this.getEmoji(combinedChanges);
 
+    if (combinedChanges.hasChanges) {
+      output.push(`:ghost: This pull request introduces changes to CloudFormation templates :ghost:\n`);
+    }
+
+    const filteredDiffs = Object.values(this.stackDiffs).filter((sd) => !(sd instanceof Error)) as StackDiffInfo[];
+
+    output.push(`***Summary of changes*** :ghost:`);
+    output.push(`\n> ${this.getDiffSummary(filteredDiffs).join('\n')}\n`);
+
     output.push('<details>');
     output.push('<summary>Summary of changes</summary>\n');
     for (const [stackName, diff] of stackDiffs) {
       if (!(diff instanceof Error)) {
-        output.push(`### ${emoji} ***Stack***: ${diff.stackName}\n> ${this.getDiffSummary(diff)}\n`);
+        output.push(`### ${emoji} ***Stack***: ${diff.stackName}\n> ${this.getDiffSummary([diff]).join(', ')}\n`);
       } else {
         output.push(`### :fire: ***Stack***: ${stackName}\n> Error: ${diff.message}\n`);
       }
@@ -52,6 +61,8 @@ export class SummaryComment extends Comment {
       updatedResources: 0,
       removedResources: 0,
       destructiveChanges: [],
+      securityGroupChanges: 0,
+      iamChanges: 0,
       hasChanges: false,
     };
 
