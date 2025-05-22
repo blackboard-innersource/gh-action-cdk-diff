@@ -70,15 +70,7 @@ project.bundler.addBundle('src/index.ts', {
   platform: 'node',
   sourcemap: true,
   target: 'node20',
-  externals: [
-    '@actions/core',
-    '@actions/github',
-    '@actions/exec',
-    '@actions/io',
-    '@actions/tool-cache',
-    'fs',
-    'fsevents',
-  ],
+  externals: ['fs', 'fsevents'],
 });
 
 project.compileTask.reset();
@@ -99,7 +91,7 @@ project.package.addField('lint-staged', {
 project.addScripts({ prepare: 'husky' });
 
 new TextFile(project, '.husky/pre-commit', {
-  lines: ['npx lint-staged', 'npm run build'],
+  lines: ['projen', 'npx lint-staged', 'npm run build'],
 });
 
 project.synth();

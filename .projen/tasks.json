@@ -38,7 +38,7 @@
       "description": "Create a JavaScript bundle from src/index.ts",
       "steps": [
         {
-          "exec": "esbuild --bundle src/index.ts --target=\"node20\" --platform=\"node\" --outfile=\"dist/index.js\" --external:@actions/core --external:@actions/github --external:@actions/exec --external:@actions/io --external:@actions/tool-cache --external:fs --external:fsevents --sourcemap"
+          "exec": "esbuild --bundle src/index.ts --target=\"node20\" --platform=\"node\" --outfile=\"dist/index.js\" --external:fs --external:fsevents --sourcemap"
         }
       ]
     },
@@ -47,7 +47,7 @@
       "description": "Continuously update the JavaScript bundle from src/index.ts",
       "steps": [
         {
-          "exec": "esbuild --bundle src/index.ts --target=\"node20\" --platform=\"node\" --outfile=\"dist/index.js\" --external:@actions/core --external:@actions/github --external:@actions/exec --external:@actions/io --external:@actions/tool-cache --external:fs --external:fsevents --sourcemap --watch"
+          "exec": "esbuild --bundle src/index.ts --target=\"node20\" --platform=\"node\" --outfile=\"dist/index.js\" --external:fs --external:fsevents --sourcemap --watch"
         }
       ]
     },
