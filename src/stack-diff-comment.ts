@@ -1,15 +1,15 @@
-import { GitHub } from '@actions/github/lib/utils';
+import { Writable, WritableOptions } from 'stream';
+import { StringDecoder } from 'string_decoder';
 import { formatDifferences } from '@aws-cdk/cloudformation-diff';
-import { Comment, StringWritable } from './comment';
+import { Comment } from './comment';
 import { StackDiffInfo } from './stack-diff';
 
 export class StackDiffComment extends Comment {
   constructor(
-    octokit: InstanceType<typeof GitHub>,
     private readonly stackName: string,
     private readonly stackDiff: StackDiffInfo,
   ) {
-    super(octokit);
+    super();
   }
 
   get id() {
@@ -58,5 +58,30 @@ export class StackDiffComment extends Comment {
     output.push('');
 
     return output.join('\n');
+  }
+}
+
+export class StringWritable extends Writable {
+  public data: string;
+  private _decoder: StringDecoder;
+
+  constructor(options: WritableOptions) {
+    super(options);
+    this._decoder = new StringDecoder();
+    this.data = '';
+  }
+
+  _write(chunk: string, encoding: string, callback: (error?: Error | null) => void): void {
+    if (encoding === 'buffer') {
+      chunk = this._decoder.write(chunk);
+    }
+
+    this.data += chunk;
+    callback();
+  }
+
+  _final(callback: (error?: Error | null) => void): void {
+    this.data += this._decoder.end();
+    callback();
   }
 }
