@@ -200,13 +200,13 @@
       },
       "steps": [
         {
-          "exec": "npx npm-check-updates@16 --upgrade --target=minor --peer --no-deprecated --dep=dev,peer,prod,optional --filter=@bb-fnds/projen,@swc/core,@swc/jest,@types/diff,@types/fs-extra,action-docs,aws-sdk,aws-sdk-client-mock,projen,projen-github-action-typescript,ts-node,typescript,@actions/core,@actions/github,@aws-cdk/cloud-assembly-schema,@aws-cdk/cloudformation-diff,@aws-cdk/cx-api,@aws-cdk/toolkit-lib,@aws-sdk/client-cloudformation,@aws-sdk/client-sts,@aws-sdk/credential-providers,@octokit/webhooks-definitions,@smithy/types,diff,fs-extra,glob-promise"
+          "exec": "npx npm-check-updates@16 --upgrade --target=minor --peer --no-deprecated --dep=dev,peer,prod,optional --filter=@bb-fnds/projen,@eslint/js,@swc/core,@swc/jest,@types/diff,@types/fs-extra,@typescript-eslint/parser,action-docs,aws-sdk,aws-sdk-client-mock,eslint-config-prettier,eslint-import-resolver-typescript,eslint-plugin-import-x,eslint-plugin-prettier,prettier,projen,projen-github-action-typescript,ts-node,typescript,typescript-eslint,@actions/core,@actions/github,@aws-cdk/cloud-assembly-schema,@aws-cdk/cloudformation-diff,@aws-cdk/cx-api,@aws-cdk/toolkit-lib,@aws-sdk/client-cloudformation,@aws-sdk/client-sts,@aws-sdk/credential-providers,@octokit/webhooks-definitions,@smithy/types,diff,fs-extra,glob-promise"
         },
         {
           "exec": "npm install"
         },
         {
-          "exec": "npm update @bb-fnds/projen @swc/core @swc/jest @types/diff @types/fs-extra @types/mock-fs @types/node action-docs aws-sdk aws-sdk-client-mock commit-and-tag-version constructs mock-fs projen projen-github-action-typescript ts-node typescript @actions/core @actions/exec @actions/github @actions/io @actions/tool-cache @aws-cdk/cloud-assembly-schema @aws-cdk/cloudformation-diff @aws-cdk/cx-api @aws-cdk/toolkit-lib @aws-sdk/client-cloudformation @aws-sdk/client-sts @aws-sdk/credential-providers @octokit/webhooks-definitions @smithy/types chalk diff fs-extra glob-promise"
+          "exec": "npm update @bb-fnds/projen @eslint/js @swc/core @swc/jest @types/diff @types/fs-extra @types/mock-fs @types/node @typescript-eslint/parser action-docs aws-sdk aws-sdk-client-mock commit-and-tag-version constructs eslint-config-prettier eslint-import-resolver-typescript eslint-plugin-import-x eslint-plugin-prettier eslint mock-fs prettier projen projen-github-action-typescript ts-node typescript typescript-eslint @actions/core @actions/exec @actions/github @actions/io @actions/tool-cache @aws-cdk/cloud-assembly-schema @aws-cdk/cloudformation-diff @aws-cdk/cx-api @aws-cdk/toolkit-lib @aws-sdk/client-cloudformation @aws-sdk/client-sts @aws-sdk/credential-providers @octokit/webhooks-definitions @smithy/types chalk diff fs-extra glob-promise"
         },
         {
           "exec": "npx projen"

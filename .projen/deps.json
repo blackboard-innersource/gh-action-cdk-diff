@@ -5,6 +5,10 @@
       "type": "build"
     },
     {
+      "name": "@eslint/js",
+      "type": "build"
+    },
+    {
       "name": "@swc/core",
       "type": "build"
     },
@@ -31,6 +35,10 @@
       "type": "build"
     },
     {
+      "name": "@typescript-eslint/parser",
+      "type": "build"
+    },
+    {
       "name": "action-docs",
       "type": "build"
     },
@@ -53,8 +61,33 @@
       "type": "build"
     },
     {
+      "name": "eslint-config-prettier",
+      "type": "build"
+    },
+    {
+      "name": "eslint-import-resolver-typescript",
+      "type": "build"
+    },
+    {
+      "name": "eslint-plugin-import-x",
+      "type": "build"
+    },
+    {
+      "name": "eslint-plugin-prettier",
+      "type": "build"
+    },
+    {
+      "name": "eslint",
+      "version": "^9",
+      "type": "build"
+    },
+    {
       "name": "mock-fs",
       "version": "^5",
+      "type": "build"
+    },
+    {
+      "name": "prettier",
       "type": "build"
     },
     {
@@ -71,6 +104,10 @@
     },
     {
       "name": "typescript",
+      "type": "build"
+    },
+    {
+      "name": "typescript-eslint",
       "type": "build"
     },
     {
