@@ -3,7 +3,7 @@ import { Writable, WritableOptions } from 'stream';
 import { StringDecoder } from 'string_decoder';
 import * as github from '@actions/github';
 import { GitHub } from '@actions/github/lib/utils';
-import { StackDiffInfo } from './stack-diff';
+import { ChangeDetails, StackDiffInfo } from './stack-diff';
 
 const MAX_COMMENT_LENGTH = 65536;
 
@@ -123,6 +123,17 @@ export abstract class Comment {
     }
 
     return segments.join(', ');
+  }
+
+  protected getEmoji(changes: ChangeDetails): string {
+    if (changes.destructiveChanges.length || changes.removedResources) {
+      return ':boom:';
+    } else if (changes.updatedResources) {
+      return ':yellow_circle:';
+    } else if (changes.createdResources) {
+      return ':sparkle:';
+    }
+    return ':white_check_mark:';
   }
 
   private async findPreviousComment() {

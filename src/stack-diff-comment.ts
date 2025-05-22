@@ -1,7 +1,7 @@
 import { GitHub } from '@actions/github/lib/utils';
 import { formatDifferences } from '@aws-cdk/cloudformation-diff';
 import { Comment, StringWritable } from './comment';
-import { ChangeDetails, StackDiffInfo } from './stack-diff';
+import { StackDiffInfo } from './stack-diff';
 
 export class StackDiffComment extends Comment {
   constructor(
@@ -28,18 +28,20 @@ export class StackDiffComment extends Comment {
     output.push(
       ...[
         `#### ${emoji} Diff for stack ***${this.stackName}***: ${this.getDiffSummary(this.stackDiff)} `,
-        '<details><summary>Details</summary>',
+        '<details>',
+        '<summary>Details</summary>',
         '',
       ],
     );
 
     if (this.stackDiff.changes.destructiveChanges.length) {
-      output.push('');
       output.push('> [!WARNING]\n> ***Destructive Changes*** :bangbang:');
+      output.push('');
 
       this.stackDiff.changes.destructiveChanges.forEach((change) => {
         output.push(
           `> **Stack: ${change.stackName} - Resource: ${change.logicalId} - Impact:** ***${change.impact}***`,
+          '',
         );
       });
     }
@@ -56,16 +58,5 @@ export class StackDiffComment extends Comment {
     output.push('');
 
     return output.join('\n');
-  }
-
-  private getEmoji(changes: ChangeDetails): string {
-    if (changes.destructiveChanges.length || changes.removedResources) {
-      return ':x:';
-    } else if (changes.updatedResources) {
-      return ':yellow_circle:';
-    } else if (changes.createdResources) {
-      return ':sparkle:';
-    }
-    return ':white_check_mark:';
   }
 }
