@@ -1,0 +1,10 @@
+{
+  "version": "v1",
+  "packages": {
+    "@bb-fnds/projen": {
+      "signature": "94178ee6661818db2fa9ef7bd56f4b52",
+      "file": true,
+      "replaced": "^0.0.0"
+    }
+  }
+}
