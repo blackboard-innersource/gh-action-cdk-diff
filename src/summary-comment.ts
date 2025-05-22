@@ -29,16 +29,16 @@ export class SummaryComment extends Comment {
 
     const emoji = this.getEmoji(combinedChanges);
 
-    output.push(...['<details>', '<summary>Summary of changes</summary>']);
+    output.push('<details>');
+    output.push('<summary>Summary of changes</summary>\n');
     for (const [stackName, diff] of stackDiffs) {
       if (!(diff instanceof Error)) {
-        output.push(...[`### ${emoji} ***Stack***: ${diff.stackName}\n> ` + this.getDiffSummary(diff)]);
+        output.push(`### ${emoji} ***Stack***: ${diff.stackName}\n> ${this.getDiffSummary(diff)}\n`);
       } else {
-        output.push(...[`### :fire: ***Stack***: ${stackName}\n> Error: ${diff.message}`]);
+        output.push(`### :fire: ***Stack***: ${stackName}\n> Error: ${diff.message}\n`);
       }
     }
     output.push('</details>');
-    output.push('');
 
     return output.join('\n');
   }

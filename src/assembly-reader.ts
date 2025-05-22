@@ -114,61 +114,14 @@ export class AssemblyReader {
             },
           };
         }
-
-        // const nestedStackAssemblySource = await this.getAssembly(`${this.assemblyPath}/${nestedAssemblyPath}`);
-        // const nestedCloudAssembly = await nestedStackAssemblySource.produce();
-
-        // for (const nestedStack of nestedCloudAssembly.cloudAssembly.stacks) {
-        //   artifacts[nestedStack.id] = {
-        //     type: 'aws:cloudformation:stack',
-        //     environment: `aws://${nestedStack.environment.account}/${nestedStack.environment.region}`,
-        //     properties: {
-        //       id: nestedStack.id,
-        //       stackName: nestedStack.id,
-        //       environment: nestedStack.environment,
-        //       // templateFile: `${nestedStack.id}.template.json`,
-        //       templateFile: nestedStack.templateFile,
-        //     },
-        //   };
-        // }
       }
     }
 
-    // console.log('Artifacts', JSON.stringify(artifacts, null, 2));
+    console.log('Artifacts', JSON.stringify(artifacts, null, 2));
 
     return {
       version: existingManifest.version,
-      artifacts: {
-        ...artifacts,
-        // ...this.assemblyTemplateFiles.reduce((acc, next) => {
-        //   // assembly-learn-core-prov-prod-974760555101-us-east-1-LearnProvisioner-AppTemplate-Stage/manifest.json
-        //   const assemblyName = path.basename(path.dirname(next));
-        //
-        //   // Parse the assembly name to get the account and region
-        //   const match = assemblyName.match(/assembly-([\w-]+)-(\w+)-(\d{12})-(us-gov-(east|west)-1|(\w+-\w+-\w+))/);
-        //
-        //   if (!match) {
-        //     throw new Error(`Assembly name ${assemblyName} does not match expected format`);
-        //   }
-        //
-        //   const stackName = match[1];
-        //   const stage = match[2];
-        //   const account = match[3];
-        //   const region = match[4];
-        //   const fullStackName = `${stackName}-${stage}-${account}-${region}`;
-        //
-        //   acc[fullStackName] = {
-        //     type: 'aws:cloudformation:stack',
-        //     environment: `aws://${account}/${region}`,
-        //     properties: {
-        //       stage,
-        //       stackName: fullStackName,
-        //       templateFile: path.relative(this.assemblyPath, next),
-        //     },
-        //   };
-        //   return acc;
-        // }, {}),
-      },
+      artifacts,
     };
   }
 
@@ -185,6 +138,8 @@ export class AssemblyReader {
 
     for (const templateFile of assemblyTemplateFiles) {
       const targetPath = path.join(this.tmpdir, path.basename(path.dirname(templateFile)), path.basename(templateFile));
+
+      console.log('Creating symlink', targetPath, '->', templateFile);
 
       fs.mkdirSync(path.dirname(targetPath), { recursive: true });
 

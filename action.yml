@@ -1,6 +1,10 @@
 name: CDK Diff
 description: Diff two cdk.out directories
 inputs:
+  github-token:
+    description: The GitHub token to use for the action. This token is automatically created by GitHub and does not require any configuration.
+    required: true
+    default: "${{ secrets.GITHUB_TOKEN }}"
   base:
     description: The cdk.out directory of the baseline or current synth
     required: true
