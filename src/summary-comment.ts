@@ -1,13 +1,9 @@
-import { GitHub } from '@actions/github/lib/utils';
 import { Comment } from './comment';
 import { ChangeDetails, StackDiffInfo } from './stack-diff';
 
 export class SummaryComment extends Comment {
-  constructor(
-    octokit: InstanceType<typeof GitHub>,
-    private readonly stackDiffs: Record<string, StackDiffInfo | Error> = {},
-  ) {
-    super(octokit);
+  constructor(private readonly stackDiffs: Record<string, StackDiffInfo | Error> = {}) {
+    super();
   }
 
   get id() {

@@ -150,7 +150,7 @@ export async function run() {
   setOutput('has-security-group-changes', hasSecurityGroupChanges);
 
   if (!inputs.disableSummary) {
-    comments.unshift(new SummaryComment(octokit, stackResults));
+    comments.unshift(new SummaryComment(stackResults));
   } else {
     debug('Summary comment is disabled, skipping summary comment');
   }
