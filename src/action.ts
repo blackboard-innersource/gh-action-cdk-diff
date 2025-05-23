@@ -60,14 +60,14 @@ export interface Inputs {
 export async function run() {
   const inputs: Inputs = {
     base: getInput('base', { required: true }),
-    githubToken: getInput('github-token', { required: true }), // Change from githubToken to github-token
+    githubToken: getInput('github_token', { required: true }), // Change from githubToken to github-token
     head: getInput('head', { required: true }),
-    disableComments: getInput('disable-comments', { required: false }) ? getBooleanInput('disable-comments') : false,
-    disableLabels: getInput('disable-labels', { required: false }) ? getBooleanInput('disable-labels') : false,
-    disableSummary: getInput('disable-summary', { required: false }) ? getBooleanInput('disable-summary') : false,
-    ignoreChanges: getMultilineInput('ignore-changes'),
-    ignoreAssetOnlyChanges: getInput('ignore-asset-only-changes', { required: false })
-      ? getBooleanInput('ignore-asset-only-changes')
+    disableComments: getInput('disable_comments', { required: false }) ? getBooleanInput('disable_comments') : false,
+    disableLabels: getInput('disable_labels', { required: false }) ? getBooleanInput('disable_labels') : false,
+    disableSummary: getInput('disable_summary', { required: false }) ? getBooleanInput('disable_summary') : false,
+    ignoreChanges: getMultilineInput('ignore_changes'),
+    ignoreAssetOnlyChanges: getInput('ignore_asset_changes', { required: false })
+      ? getBooleanInput('ignore_asset_only_changes')
       : false,
   };
 

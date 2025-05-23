@@ -32,8 +32,8 @@ inputs:
     description: A list of resources that are ignored in the diff. This is a comma-separated list of resource logical IDs.
     required: false
     default: "false"
-  ignore-asset-only-changes:
-    description: If true, the action will ignore changes to assets in the diff. This is useful for large diffs.
+  ignore-asset-changes:
+    description: If true, the action will ignore changes to assets in the diff. This is useful for ignoring changes to the stack that are only caused by changes to the assets.
     required: false
     default: "false"
 outputs:
@@ -64,15 +64,15 @@ runs:
       shell: bash
       working-directory: ${{ github.action_path }}
       env:
-        INPUT_GITHUB-TOKEN: ${{ inputs.github-token }}
+        INPUT_GITHUB_TOKEN: ${{ inputs.github-token }}
 #        BASE_PATH: ${{ github.workspace }}/${{ inputs.base }}
 #        HEAD_PATH: ${{ github.workspace }}/${{ inputs.head }}
         INPUT_BASE: ${{ inputs.base }}
         INPUT_HEAD: ${{ inputs.head }}
-        INPUT_DISABLE-COMMENTS: ${{ inputs.disable-comments }}
-        INPUT_DISABLE-LABELS: ${{ inputs.disable-labels }}
-        INPUT_DISABLE-SUMMARY: ${{ inputs.disable-summary }}
-        INPUT_IGNORE-CHANGES: ${{ inputs.ignore-changes }}
-        INPUT_IGNORE-ASSET-CHANGES: ${{ inputs.ignore-asset-only-changes }}
+        INPUT_DISABLE_COMMENTS: ${{ inputs.disable-comments }}
+        INPUT_DISABLE_LABELS: ${{ inputs.disable-labels }}
+        INPUT_DISABLE_SUMMARY: ${{ inputs.disable-summary }}
+        INPUT_IGNORE_CHANGES: ${{ inputs.ignore-changes }}
+        INPUT_IGNORE_ASSET_CHANGES: ${{ inputs.ignore-asset-changes }}
 #      run: node ${{ github.action_path }}/dist/index.js
       run: npx ts-node ${{ github.action_path }}/src/index.ts

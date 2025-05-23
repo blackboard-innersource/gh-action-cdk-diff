@@ -36,6 +36,24 @@ export class CommentUpdater {
     }
   }
 
+  public compressedComment(comments: Comment[]): string {
+    const commentBodies: string[] = [];
+
+    let body: string = '';
+    for (const comment of comments) {
+      const commentContent = comment.content;
+
+      if ((body + commentContent).length < MAX_COMMENT_LENGTH) {
+        body += commentContent;
+      } else {
+        commentBodies.push(body);
+        body = '';
+      }
+    }
+
+    return commentBodies.join('\n');
+  }
+
   public async updatePullRequest(comment: Comment): Promise<void> {
     let body = [`<!-- cdk diff action with id ${comment.id} ${comment.hash} -->`, comment.content, ''].join('\n');
 
