@@ -12,6 +12,7 @@ const project = new typescript.TypeScriptProject({
   packageManager: NodePackageManager.NPM,
   deps: [
     '@octokit/webhooks-definitions',
+    '@aws-cdk/aws-service-spec',
     '@aws-cdk/cloudformation-diff',
     '@aws-cdk/cloud-assembly-schema',
     '@aws-cdk/cx-api',
