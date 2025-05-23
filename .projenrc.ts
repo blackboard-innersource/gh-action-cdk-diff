@@ -60,7 +60,7 @@ const project = new typescript.TypeScriptProject({
   projenrcTs: true,
   eslint: false,
   jest: false,
-  minNodeVersion: '20',
+  minNodeVersion: '18',
   licensed: false,
 });
 
