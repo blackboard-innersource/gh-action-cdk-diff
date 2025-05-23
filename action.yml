@@ -64,15 +64,15 @@ runs:
       shell: bash
       working-directory: ${{ github.action_path }}
       env:
-        INPUT_GITHUB_TOKEN: ${{ inputs.github-token }}
+        INPUT_GITHUB-TOKEN: ${{ inputs.github-token }}
 #        BASE_PATH: ${{ github.workspace }}/${{ inputs.base }}
 #        HEAD_PATH: ${{ github.workspace }}/${{ inputs.head }}
         INPUT_BASE: ${{ inputs.base }}
         INPUT_HEAD: ${{ inputs.head }}
-        INPUT_DISABLE_COMMENTS: ${{ inputs.disable-comments }}
-        INPUT_DISABLE_LABELS: ${{ inputs.disable-labels }}
-        INPUT_DISABLE_SUMMARY: ${{ inputs.disable-summary }}
-        INPUT_IGNORE_CHANGES: ${{ inputs.ignore-changes }}
-        INPUT_IGNORE_ASSET_CHANGES: ${{ inputs.ignore-asset-only-changes }}
+        INPUT_DISABLE-COMMENTS: ${{ inputs.disable-comments }}
+        INPUT_DISABLE-LABELS: ${{ inputs.disable-labels }}
+        INPUT_DISABLE-SUMMARY: ${{ inputs.disable-summary }}
+        INPUT_IGNORE-CHANGES: ${{ inputs.ignore-changes }}
+        INPUT_IGNORE-ASSET-CHANGES: ${{ inputs.ignore-asset-only-changes }}
 #      run: node ${{ github.action_path }}/dist/index.js
       run: npx ts-node ${{ github.action_path }}/src/index.ts

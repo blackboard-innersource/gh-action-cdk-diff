@@ -32,7 +32,6 @@ const project = new typescript.TypeScriptProject({
     'glob-promise',
   ],
   devDeps: [
-    '@bb-fnds/projen',
     '@eslint/js',
     '@swc/core',
     '@swc/jest',

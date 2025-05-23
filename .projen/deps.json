@@ -1,10 +1,6 @@
 {
   "dependencies": [
     {
-      "name": "@bb-fnds/projen",
-      "type": "build"
-    },
-    {
       "name": "@eslint/js",
       "type": "build"
     },
