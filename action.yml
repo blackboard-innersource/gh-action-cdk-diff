@@ -65,4 +65,4 @@ runs:
         DISABLE_SUMMARY: ${{ inputs.disable-summary }}
         IGNORE_CHANGES: ${{ inputs.ignore-changes }}
         IGNORE_ASSET_CHANGES: ${{ inputs.ignore-asset-only-changes }}
-      run: node dist/index.js
+      run: node ${{ github.action_path }}/dist/index.js
