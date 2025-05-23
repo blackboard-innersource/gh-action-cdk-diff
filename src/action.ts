@@ -67,7 +67,7 @@ export async function run() {
     disableSummary: getInput('disable_summary', { required: false }) ? getBooleanInput('disable_summary') : false,
     ignoreChanges: getMultilineInput('ignore_changes'),
     ignoreAssetOnlyChanges: getInput('ignore_asset_changes', { required: false })
-      ? getBooleanInput('ignore_asset_only_changes')
+      ? getBooleanInput('ignore_asset_changes')
       : false,
   };
 
