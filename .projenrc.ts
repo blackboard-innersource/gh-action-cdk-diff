@@ -70,7 +70,7 @@ project.bundler.addBundle('src/index.ts', {
   platform: 'node',
   sourcemap: true,
   target: 'node20',
-  externals: ['fs', 'fsevents'],
+  externals: ['@aws-cdk/aws-service-spec', 'fs', 'fsevents'],
 });
 
 project.compileTask.reset();

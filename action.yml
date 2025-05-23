@@ -51,8 +51,7 @@ runs:
     - name: Install dependencies
       shell: bash
       run: |
-        npm ci
-        npm install -g ts-node typescript
+        npm install -g @aws-cdk/aws-service-spec
 
     - name: Run CDK Diff
       id: cdk-diff
@@ -66,4 +65,4 @@ runs:
         DISABLE_SUMMARY: ${{ inputs.disable-summary }}
         IGNORE_CHANGES: ${{ inputs.ignore-changes }}
         IGNORE_ASSET_CHANGES: ${{ inputs.ignore-asset-only-changes }}
-      run: ts-node src/index.ts
+      run: node dist/index.js
