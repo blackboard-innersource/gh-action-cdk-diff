@@ -36,7 +36,10 @@ export class CommentUpdater {
     }
   }
 
-  public compressedComment(comments: Comment[]): string {
+  /**
+   * Combines the comments into one or more PR comments.
+   */
+  public combineCommentBodies(comments: Comment[]): string[] {
     const commentBodies: string[] = [];
 
     let body: string = '';
@@ -51,7 +54,7 @@ export class CommentUpdater {
       }
     }
 
-    return commentBodies.join('\n');
+    return commentBodies;
   }
 
   public async updatePullRequest(comment: Comment): Promise<void> {

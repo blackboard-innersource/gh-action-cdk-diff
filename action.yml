@@ -62,7 +62,7 @@ runs:
     - name: Run CDK Diff
       id: cdk-diff
       shell: bash
-      working-directory: ${{ github.action_path }}
+      working-directory: ${{ github.workspace }}
       env:
         INPUT_GITHUB_TOKEN: ${{ inputs.github-token }}
 #        BASE_PATH: ${{ github.workspace }}/${{ inputs.base }}
