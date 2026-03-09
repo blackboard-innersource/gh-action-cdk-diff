@@ -142,7 +142,7 @@ copy_templates() {
       done
     fi
 
-    cp "$TEMPLATE" "$YAML_FILE"
+    jq --sort-keys . "$TEMPLATE" > "$YAML_FILE"
   done
   return 0
 }

@@ -150,6 +150,16 @@ EOF
   assert_output "The 'base' and 'head' inputs point to the same base directory names"
 }
 
+@test "cdk_diff reports no diff when templates differ only in key ordering" {
+  run cdk_diff test/fixtures/base.cdk.out test/fixtures/base.reordered.cdk.out "$TMPDIR"
+  assert_success
+  assert_output -e ".*processed 0 template files.*"
+  run cat $GITHUB_OUTPUT
+  assert_output -p 'diff=0'
+  run cat "$TMPDIR/diff_comment.md"
+  assert_output ":star: No CloudFormation template differences found :star:"
+}
+
 @test "cdk_diff skips keys" {
   CDK_DIFF_IGNORE_KEYS="S3Key"
   run cdk_diff test/fixtures/base.cdk.out test/fixtures/head.cdk.out "$TMPDIR"
