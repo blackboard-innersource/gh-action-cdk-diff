@@ -23,6 +23,7 @@ function teardown {
   run diff_comment summary diff
   assert_success
   assert_output <<EOF
+<!-- gh-action-cdk-diff -->
 :ghost: This pull request introduces changes to CloudFormation templates :ghost:
 
 <details>
@@ -95,6 +96,7 @@ EOF
   assert [ -f "$TMPDIR/synth.diff" ]
 
   run cat "$TMPDIR/diff_comment.md"
+  assert_output -p "<!-- gh-action-cdk-diff -->"
   assert_output -p "This pull request introduces changes to CloudFormation templates"
   assert_output -p "Files base.cdk.out/example.template.yaml and head.cdk.out/example.template.yaml differ"
   assert_output -p "diff -u base.cdk.out/example.template.yaml head.cdk.out/example.template.yaml"
@@ -174,4 +176,24 @@ EOF
   assert_success
   run cat $TMPDIR/base.cdk.out/example.template.yaml
   refute_output --partial "S3Key:"
+}
+
+@test "cdk_diff respects CDK_DIFF_COMMENT_BUFFER" {
+  # First verify that without a large buffer, the diff is NOT truncated
+  run cdk_diff test/fixtures/base.cdk.out test/fixtures/head.cdk.out "$TMPDIR"
+  assert_success
+  run cat "$TMPDIR/diff_comment.md"
+  refute_output --partial "TRUNCATED"
+
+  # Now set a very large buffer that leaves almost no room for the diff,
+  # forcing truncation. This proves CDK_DIFF_COMMENT_BUFFER actually reduces
+  # the available space for diff output.
+  TMPDIR=$(mktemp -d)
+  GITHUB_OUTPUT="$TMPDIR/GITHUB_OUTPUT"
+  touch "$GITHUB_OUTPUT"
+  CDK_DIFF_COMMENT_BUFFER=65400
+  run cdk_diff test/fixtures/base.cdk.out test/fixtures/head.cdk.out "$TMPDIR"
+  assert_success
+  run cat "$TMPDIR/diff_comment.md"
+  assert_output --partial "TRUNCATED"
 }
