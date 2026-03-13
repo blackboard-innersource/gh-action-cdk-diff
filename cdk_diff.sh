@@ -47,7 +47,8 @@ cdk_diff() {
 
     # Determine how much room we have for the DIFF output
     SUMMARY_SIZE=$(diff_comment "$SUMMARY" "empty" | wc -c)
-    MAX_TOTAL=65450 # GH max comment size is 65536.
+    BUFFER=${CDK_DIFF_COMMENT_BUFFER:-0}
+    MAX_TOTAL=$((65450 - BUFFER)) # GH max comment size is 65536.
     REMAINING_LEN=$((MAX_TOTAL - SUMMARY_SIZE))
     # Comment will probably be too large, but lets not use negative numbers
     REMAINING_LEN=$((REMAINING_LEN < 10 ? 10 : REMAINING_LEN))
@@ -93,6 +94,7 @@ diff_summary() {
 # Create a comment about the diff summary and output
 diff_comment() {
   cat <<EOF
+<!-- gh-action-cdk-diff -->
 :ghost: This pull request introduces changes to CloudFormation templates :ghost:
 
 <details>

@@ -89,7 +89,7 @@ jobs:
         with:
           issue-number: ${{ github.event.pull_request.number }}
           comment-author: "github-actions[bot]"
-          body-includes: CloudFormation
+          body-includes: gh-action-cdk-diff
 
       - name: Create or update comment
         uses: peter-evans/create-or-update-comment@v4

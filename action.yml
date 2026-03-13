@@ -17,6 +17,9 @@ inputs:
   rename:
     description: Rename base and head on copy instead of maintaining directory names - set to any value to enable
     required: false
+  comment-buffer:
+    description: Reserve extra X characters in the comment for caller-appended content
+    required: false
 outputs:
   has_diff:
     description: Has the value of 0 if no differences found or 1 if differences found
@@ -40,3 +43,4 @@ runs:
       env:
         CDK_DIFF_IGNORE_KEYS: "${{ inputs.ignore-keys }}"
         CDK_DIFF_RENAME: "${{ inputs.rename }}"
+        CDK_DIFF_COMMENT_BUFFER: "${{ inputs.comment-buffer }}"
