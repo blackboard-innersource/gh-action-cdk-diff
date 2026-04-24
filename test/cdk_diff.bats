@@ -119,7 +119,8 @@ EOF
   assert [ -f "$TMPDIR/synth.diff" ]
 
   run cat "$TMPDIR/diff_comment.md"
-  assert_output ":star: No CloudFormation template differences found :star:"
+  assert_output -p "<!-- gh-action-cdk-diff -->"
+  assert_output -p ":star: No CloudFormation template differences found :star:"
 }
 
 @test "cdk_diff can rename on copy" {
@@ -159,7 +160,8 @@ EOF
   run cat $GITHUB_OUTPUT
   assert_output -p 'diff=0'
   run cat "$TMPDIR/diff_comment.md"
-  assert_output ":star: No CloudFormation template differences found :star:"
+  assert_output -p "<!-- gh-action-cdk-diff -->"
+  assert_output -p ":star: No CloudFormation template differences found :star:"
 }
 
 @test "cdk_diff skips keys" {

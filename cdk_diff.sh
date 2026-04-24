@@ -61,7 +61,8 @@ cdk_diff() {
   fi
 
   echo "diff=0" >> $GITHUB_OUTPUT
-  echo ":star: No CloudFormation template differences found :star:" > "$OUTFILE"
+  echo "<!-- gh-action-cdk-diff -->" > "$OUTFILE"
+  echo ":star: No CloudFormation template differences found :star:" >> "$OUTFILE"
   touch "$DIFFFILE"
   return 0
 }
