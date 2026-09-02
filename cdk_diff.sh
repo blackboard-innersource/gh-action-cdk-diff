@@ -173,7 +173,7 @@ to_yaml() {
     fi
   done
 
-  echo "📄 yq processed $PROCESSED template files"
+  echo "🔄 yq processed $PROCESSED template files"
 }
 
 if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
