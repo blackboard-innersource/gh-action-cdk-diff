@@ -48,6 +48,31 @@ function teardown {
   assert_output -p "Failed to verify checksum"
 }
 
+@test "have_yq accepts the yq that install_yq.sh downloads" {
+  if [ "$(uname -s)" != "Linux" ]; then
+    skip "install_yq.sh downloads a Linux binary, which only runs on Linux"
+  fi
+
+  run download_yq
+  assert_success
+  chmod +x yq
+
+  # Put the downloaded binary ahead of any yq already on the runner, so this
+  # tests the version we pin rather than whatever happens to be installed
+  PATH="$PWD:$PATH"
+  run command -v yq
+  assert_output "$PWD/yq"
+
+  # have_yq greps the --version output, so if upstream reworded it we would
+  # silently fail this check and re-download yq on every single run
+  run yq --version
+  assert_success
+  assert_output -p "mikefarah/yq"
+
+  run have_yq
+  assert_success
+}
+
 @test "have_yq rejects a yq that is not mikefarah v4" {
   yq() { echo "yq 3.4.3"; }
   export -f yq

@@ -8,10 +8,10 @@ download_yq() {
   wget --no-verbose -O yq "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_${arch}"
 }
 
-# Very wonky to find this checksum: the release ships a "checksums" file with 31
-# hash columns whose order is listed in "checksums_hashes_order". SHA-256 is the
-# 18th hash, so it is field 19 of each line:
-#   awk '{print $19}' <<< "$(grep '^yq_linux_amd64 ' checksums)"
+# Very wonky to find these checksums, so do not read them off the release page.
+# After bumping YQ_VERSION, run `make`: the two checksum tests download the new
+# binaries and fail with the value they computed. Copy each "Got:" into the
+# matching branch below and run `make` again to confirm.
 verify_yq() {
   arch=$(arch_yq)
   if [ "$arch" = "arm64" ]; then
