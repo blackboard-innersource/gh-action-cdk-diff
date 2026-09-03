@@ -165,14 +165,15 @@ to_yaml() {
       continue
     fi
 
+    # The files hold sorted JSON at this point, which yq rewrites as YAML
     if ! cmp --silent -- "$BASEDIR/$NAME" "$HEADDIR/$NAME"; then
-      rain fmt -w "$BASEDIR/$NAME"
-      rain fmt -w "$HEADDIR/$NAME"
+      yq -p=json -o=yaml -i "$BASEDIR/$NAME" || return 1
+      yq -p=json -o=yaml -i "$HEADDIR/$NAME" || return 1
       ((PROCESSED++))
     fi
   done
 
-  echo "🌧️  Rain processed $PROCESSED template files"
+  echo "🔄 yq processed $PROCESSED template files"
 }
 
 if [ "${BASH_SOURCE[0]}" = "${0}" ]; then

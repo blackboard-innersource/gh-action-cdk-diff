@@ -1,23 +1,26 @@
 #!/usr/bin/env bash
 
-download_rain() {
-  arch=$(arch_rain)
-  echo "⬇️ Downloading rain for ${arch}"
-  wget --no-verbose -O rain.zip https://github.com/aws-cloudformation/rain/releases/download/v1.21.0/rain-v1.21.0_linux-${arch}.zip
-  unzip -j rain.zip '*/rain' -d .
-  rm -f rain.zip
+YQ_VERSION="v4.53.6"
+
+download_yq() {
+  arch=$(arch_yq)
+  echo "⬇️ Downloading yq ${YQ_VERSION} for ${arch}"
+  wget --no-verbose -O yq "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_${arch}"
 }
 
-# Very wonky to find this checksum
-verify_rain() {
-  arch=$(arch_rain)
+# Very wonky to find these checksums, so do not read them off the release page.
+# After bumping YQ_VERSION, run `make`: the two checksum tests download the new
+# binaries and fail with the value they computed. Copy each "Got:" into the
+# matching branch below and run `make` again to confirm.
+verify_yq() {
+  arch=$(arch_yq)
   if [ "$arch" = "arm64" ]; then
-    CHECKSUM="7fe35e499510630a13f6fc39845a571c2a9fe99e8242ce0e3cfd4dbcc42fa647"
+    CHECKSUM="88a1016bc1d657375a35864e4f44b6f333df8ff97b559f51bba0adcb2169df09"
   else
-    CHECKSUM="27a0673c2ee089328938ae27355349ee95e3156a351a543ef04e327279ee0e01"
+    CHECKSUM="c5f056448f973ae7d39b5401949648a78f2dc1947d6a8eb65be60d5c504b9385"
   fi
-  echo "🔒 Verifying checksum of rain ${arch}"
-  verify_file "$CHECKSUM" "rain" || return 1
+  echo "🔒 Verifying checksum of yq ${arch}"
+  verify_file "$CHECKSUM" "yq" || return 1
 }
 
 verify_file() {
@@ -60,7 +63,7 @@ verify_file() {
     return 1
 }
 
-arch_rain() {
+arch_yq() {
   if [ "$(uname -m)" = "aarch64" ]; then
     echo "arm64"
   else
@@ -90,12 +93,18 @@ install_binary() {
   return 1
 }
 
+# "yq" is a common command name, so make sure any existing one is Mike Farah's
+# Go version 4 and not, say, the Python jq wrapper that shares the name.
+have_yq() {
+  command -v yq >/dev/null 2>&1 && yq --version 2>&1 | grep -q "mikefarah/yq.*version v4"
+}
+
 main() {
-  if command -v rain >/dev/null 2>&1; then
-    echo "✅ Rain is already installed: $(rain --version)"
+  if have_yq; then
+    echo "✅ yq is already installed: $(yq --version)"
     return 0
   fi
-  download_rain && verify_rain && install_binary "rain" && rain --version
+  download_yq && verify_yq && install_binary "yq" && yq --version
 }
 
 if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
