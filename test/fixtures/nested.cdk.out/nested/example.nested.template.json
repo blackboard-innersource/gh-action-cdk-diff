@@ -1,0 +1,7 @@
+{
+  "Resources": {
+    "NestedBucket": {
+      "Type": "AWS::S3::Bucket"
+    }
+  }
+}

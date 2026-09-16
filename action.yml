@@ -20,6 +20,18 @@ inputs:
   comment-buffer:
     description: Reserve extra X characters in the comment for caller-appended content
     required: false
+  upload-artifact:
+    description: Upload the base and head templates and the raw diff as a workflow artifact
+    required: false
+    default: "true"
+  artifact-name:
+    description: Name of the uploaded workflow artifact
+    required: false
+    default: cdk-diff
+  retention-days:
+    description: Number of days to keep the uploaded workflow artifact
+    required: false
+    default: "14"
 outputs:
   has_diff:
     description: Has the value of 0 if no differences found or 1 if differences found
@@ -30,6 +42,9 @@ outputs:
   diff_file:
     description: A file that contains the unaltered diff output
     value: ${{ steps.diff.outputs.diff_file }}
+  artifact-name:
+    description: Name of the uploaded workflow artifact
+    value: ${{ inputs.artifact-name }}
 runs:
   using: "composite"
   steps:
@@ -44,3 +59,21 @@ runs:
         CDK_DIFF_IGNORE_KEYS: "${{ inputs.ignore-keys }}"
         CDK_DIFF_RENAME: "${{ inputs.rename }}"
         CDK_DIFF_COMMENT_BUFFER: "${{ inputs.comment-buffer }}"
+    - name: Collect templates
+      id: collect
+      # success() is explicit so this never runs after a failed diff step
+      if: success() && inputs.upload-artifact == 'true'
+      run: |
+        ARTIFACT_DIR=$(mktemp -d)
+        ${{ github.action_path }}/collect_templates.sh ${{ inputs.base }} ${{ inputs.head }} "$ARTIFACT_DIR"
+        cp ${{ steps.diff.outputs.diff_file }} "$ARTIFACT_DIR/synth.diff"
+        echo "dir=$ARTIFACT_DIR" >> $GITHUB_OUTPUT
+      shell: bash
+    - name: Upload artifact
+      if: success() && inputs.upload-artifact == 'true'
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: ${{ steps.collect.outputs.dir }}
+        retention-days: ${{ inputs.retention-days }}
+        if-no-files-found: error
