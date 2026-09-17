@@ -129,7 +129,7 @@ Inputs:
 
 - `upload-artifact` - set to `false` to skip the upload. Default `true`.
 - `artifact-name` - name of the artifact. Default `cdk-diff`.
-- `retention-days` - how long to keep the artifact. Default `14`.
+- `retention-days` - how long to keep the artifact. Default `25`.
 
 To download the artifact:
 

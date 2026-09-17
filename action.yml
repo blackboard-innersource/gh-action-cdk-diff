@@ -31,7 +31,7 @@ inputs:
   retention-days:
     description: Number of days to keep the uploaded workflow artifact
     required: false
-    default: "14"
+    default: "25"
 outputs:
   has_diff:
     description: Has the value of 0 if no differences found or 1 if differences found
