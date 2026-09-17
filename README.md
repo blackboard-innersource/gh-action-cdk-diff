@@ -115,6 +115,34 @@ You can also only comment on the pull request when there is a diff by using `if`
   # etc...
 ```
 
+### Workflow Artifact
+
+By default the action uploads a workflow artifact containing:
+
+- `base/**/*.template.json` - every template found under the `base` directory, paths preserved.
+- `head/**/*.template.json` - every template found under the `head` directory, paths preserved.
+- `synth.diff` - the unaltered `diff -u` output, the same file as the `diff_file` output.
+
+Nested stack templates are included. Assets, `manifest.json` and `tree.json` are not.
+
+Inputs:
+
+- `upload-artifact` - set to `false` to skip the upload. Default `true`.
+- `artifact-name` - name of the artifact. Default `cdk-diff`.
+- `retention-days` - how long to keep the artifact. Default `25`.
+
+To download the artifact:
+
+```shell script
+gh run download <run-id> -n cdk-diff
+```
+
+The templates can also be collected outside of GitHub Actions:
+
+```shell script
+./collect_templates.sh base.cdk.out head.cdk.out out
+```
+
 ## Developing
 
 To run tests locally:
