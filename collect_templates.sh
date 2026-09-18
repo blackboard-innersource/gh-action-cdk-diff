@@ -32,12 +32,24 @@ copy_template_tree() {
   COUNT=0
 
   mkdir -p "$DEST" || return 1
+
+  # The file list goes through a temp file rather than process substitution.
+  # Lambda-based CodeBuild images have no /dev/fd, which bash needs for <(...),
+  # and the loop would silently copy nothing.
+  LIST=$(mktemp) || return 1
+  if ! find "$SRC" -type f -name '*.template.json' -print0 > "$LIST"; then
+    rm -f "$LIST"
+    return 1
+  fi
   while IFS= read -r -d '' TEMPLATE; do
     REL=${TEMPLATE#"$SRC"/}
-    mkdir -p "$DEST/$(dirname "$REL")" || return 1
-    cp "$TEMPLATE" "$DEST/$REL" || return 1
+    if ! mkdir -p "$DEST/$(dirname "$REL")" || ! cp "$TEMPLATE" "$DEST/$REL"; then
+      rm -f "$LIST"
+      return 1
+    fi
     COUNT=$((COUNT + 1))
-  done < <(find "$SRC" -type f -name '*.template.json' -print0)
+  done < "$LIST"
+  rm -f "$LIST"
 
   echo "Copied $COUNT template files to $DEST"
   return 0
