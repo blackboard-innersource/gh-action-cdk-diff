@@ -84,9 +84,40 @@ EOF
   assert_output "The '$TMPDIR/test' directory already exists"
 }
 
+@test "copy_templates skips templates that match the other side" {
+  run copy_templates test/fixtures/base.cdk.out "$TMPDIR/test" test/fixtures/base.copy.cdk.out
+  assert_success
+  assert_output "📋 copied 0 of 1 template files from test/fixtures/base.cdk.out"
+  run bash -c "find '$TMPDIR/test' -type f"
+  assert_output ""
+}
+
+@test "copy_templates copies templates that differ from the other side" {
+  run copy_templates test/fixtures/base.cdk.out "$TMPDIR/test" test/fixtures/head.cdk.out
+  assert_success
+  assert_output "📋 copied 1 of 1 template files from test/fixtures/base.cdk.out"
+  assert [ -f "$TMPDIR/test/example.template.yaml" ]
+}
+
+@test "copy_templates copies templates missing from the other side" {
+  run copy_templates test/fixtures/nested.cdk.out "$TMPDIR/test" test/fixtures/base.cdk.out
+  assert_success
+  assert_output "📋 copied 2 of 2 template files from test/fixtures/nested.cdk.out"
+  assert [ -f "$TMPDIR/test/example.template.yaml" ]
+  assert [ -f "$TMPDIR/test/example.nested.template.yaml" ]
+}
+
+@test "copy_templates copies everything without another side" {
+  run copy_templates test/fixtures/base.cdk.out "$TMPDIR/test"
+  assert_success
+  assert_output "📋 copied 1 of 1 template files from test/fixtures/base.cdk.out"
+  assert [ -f "$TMPDIR/test/example.template.yaml" ]
+}
+
 @test "cdk_diff can diff two cdk.out directories" {
   run cdk_diff test/fixtures/base.cdk.out test/fixtures/head.cdk.out "$TMPDIR"
   assert_success
+  assert_output -e ".*copied 1 of 1 template files.*"
   assert_output -e ".*processed 1 template files.*"
   run cat $GITHUB_OUTPUT
   assert_output -p "comment_file=$TMPDIR/diff_comment.md"
@@ -109,7 +140,8 @@ EOF
 @test "cdk_diff can diff two cdk.out directories that are the same" {
   run cdk_diff test/fixtures/base.cdk.out test/fixtures/base.copy.cdk.out "$TMPDIR"
   assert_success
-  # This is zero because we only convert JSON to YAML if they are different
+  # Identical templates are never copied or converted to YAML
+  assert_output -e ".*copied 0 of 1 template files.*"
   assert_output -e ".*processed 0 template files.*"
   run cat $GITHUB_OUTPUT
   assert_output -p "comment_file=$TMPDIR/diff_comment.md"
