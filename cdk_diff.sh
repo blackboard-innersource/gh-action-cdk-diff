@@ -29,8 +29,8 @@ cdk_diff() {
     return 1
   fi
 
-  copy_templates "$BASE_ARG" "$TMPDIR/$BASE" || return 1
-  copy_templates "$HEAD_ARG" "$TMPDIR/$HEAD" || return 1
+  copy_templates "$BASE_ARG" "$TMPDIR/$BASE" "$HEAD_ARG" || return 1
+  copy_templates "$HEAD_ARG" "$TMPDIR/$HEAD" "$BASE_ARG" || return 1
   to_yaml "$TMPDIR/$BASE" "$TMPDIR/$HEAD" || return 1
 
   cd "$TMPDIR" || return 1
@@ -119,13 +119,30 @@ EOF
 }
 
 # Copy template files (with any ignore key edits) to a new directory - renaming them to .yaml
+# Templates that are byte-identical to their counterpart in the optional third directory
+# cannot appear in the diff, so they are neither normalized nor copied
 copy_templates() {
   if [ -d "$2" ]; then
     echo "The '$2' directory already exists"
     return 1
   fi
   mkdir "$2"
-  TEMPLATES=$(find "$1" -type f -name '*.template.json')
+  SRC=${1%/}
+  ALL_TEMPLATES=$(find "$SRC" -type f -name '*.template.json' | LC_ALL=C sort)
+  TOTAL=$(printf '%s' "$ALL_TEMPLATES" | grep -c '')
+  if [ -n "${3:-}" ]; then
+    # Temp files rather than process substitution, which needs /dev/fd
+    ALL_FILE=$(mktemp)
+    IDENTICAL_FILE=$(mktemp)
+    printf '%s\n' "$ALL_TEMPLATES" > "$ALL_FILE"
+    identical_templates "$SRC" "$3" | LC_ALL=C sort > "$IDENTICAL_FILE"
+    TEMPLATES=$(LC_ALL=C comm -23 "$ALL_FILE" "$IDENTICAL_FILE")
+    rm -f "$ALL_FILE" "$IDENTICAL_FILE"
+  else
+    TEMPLATES=$ALL_TEMPLATES
+  fi
+  COPIED=$(printf '%s' "$TEMPLATES" | grep -c '')
+
   for TEMPLATE in $TEMPLATES; do
     NAME=$(basename "$TEMPLATE" | sed 's/\.template\.json/\.template\.yaml/')
     YAML_FILE="$2/$NAME"
@@ -147,7 +164,24 @@ copy_templates() {
 
     jq --sort-keys . "$TEMPLATE" > "$YAML_FILE"
   done
+
+  echo "📋 copied $COPIED of $TOTAL template files from $1"
   return 0
+}
+
+# List the templates under the first directory that are byte-identical to the
+# same relative path under the second, using a single diff for the whole tree
+identical_templates() {
+  local base=${1%/} head=${2%/} line len
+  LC_ALL=C diff -rqs -x 'asset.*' -- "$base" "$head" 2>/dev/null | while IFS= read -r line; do
+    case $line in
+      "Files $base/"*".template.json are identical") ;;
+      *) continue ;;
+    esac
+    # "Files <base>/<rel> and <head>/<rel> are identical" holds <rel> twice around 27 fixed characters
+    len=$(( (${#line} - ${#base} - ${#head} - 27) / 2 ))
+    printf '%s\n' "${line:6:$((${#base} + 1 + len))}"
+  done
 }
 
 # Used to convert JSON to YAML for shorter diffs
